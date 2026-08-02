@@ -1,0 +1,108 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.barra-superior {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #e2e8f0;
+  background: white;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 5%);
+}
+
+.barra-contenido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  min-height: 72px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1e293b;
+  text-decoration: none;
+}
+
+.marca-icono {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.marca strong,
+.marca small {
+  display: block;
+}
+
+.marca strong {
+  font-size: 16px;
+}
+
+.marca small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.navegacion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navegacion a {
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.navegacion a:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.navegacion .opcion-activa {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+main {
+  min-height: calc(100vh - 72px);
+}
+
+@media (max-width: 600px) {
+  .barra-contenido {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .navegacion {
+    width: 100%;
+  }
+
+  .navegacion a {
+    flex: 1;
+    text-align: center;
+  }
+}

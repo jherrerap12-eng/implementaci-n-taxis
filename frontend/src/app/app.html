@@ -1,1 +1,32 @@
-<router-outlet />
+<header class="barra-superior">
+  <div class="barra-contenido">
+    <a class="marca" routerLink="/pilotos">
+      <span class="marca-icono">TX</span>
+
+      <div>
+        <strong>Sistema de flotilla</strong>
+        <small>Control administrativo</small>
+      </div>
+    </a>
+
+    <nav class="navegacion">
+      <a
+        routerLink="/pilotos"
+        routerLinkActive="opcion-activa"
+      >
+        Pilotos
+      </a>
+
+      <a
+        routerLink="/unidades"
+        routerLinkActive="opcion-activa"
+      >
+        Unidades
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>
