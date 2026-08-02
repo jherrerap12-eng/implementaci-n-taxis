@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoPiloto {
+  ACTIVO
+  INACTIVO
+}
+
+enum EstadoUnidad {
+  DISPONIBLE
+  EN_RUTA
+  MANTENIMIENTO
+  FUERA_DE_SERVICIO
+}
+
+enum TipoCombustible {
+  GASOLINA
+  DIESEL
+}
+
+model Piloto {
+  id                  Int          @id @default(autoincrement())
+  codigo              String       @unique @db.VarChar(20)
+  nombreCompleto      String       @map("nombre_completo") @db.VarChar(150)
+  telefono            String?      @db.VarChar(20)
+  numeroLicencia      String       @unique @map("numero_licencia") @db.VarChar(50)
+  vencimientoLicencia DateTime     @map("vencimiento_licencia") @db.Date
+  estado              EstadoPiloto @default(ACTIVO)
+  observaciones       String?
+  creadoEn            DateTime     @default(now()) @map("creado_en")
+  actualizadoEn       DateTime     @updatedAt @map("actualizado_en")
+
+  @@map("pilotos")
+}
+
+model Unidad {
+  id                Int             @id @default(autoincrement())
+  numeroUnidad      String          @unique @map("numero_unidad") @db.VarChar(20)
+  placa             String          @unique @db.VarChar(20)
+  marca             String          @db.VarChar(50)
+  modelo            String          @db.VarChar(50)
+  anio              Int
+  tipoCombustible   TipoCombustible @map("tipo_combustible")
+  kilometrajeActual Int             @map("kilometraje_actual")
+  estado            EstadoUnidad    @default(DISPONIBLE)
+  observaciones     String?
+  creadoEn          DateTime        @default(now()) @map("creado_en")
+  actualizadoEn     DateTime        @updatedAt @map("actualizado_en")
+
+  @@map("unidades")
+}

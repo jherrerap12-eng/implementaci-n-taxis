@@ -2,3 +2,12 @@ node_modules/
 dist/
 .env
 *.log
+
+# Cliente generado automáticamente por Prisma
+src/generated/prisma/
+
+# Archivos auxiliares generados por Prisma CLI
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
