@@ -1,0 +1,225 @@
+<section class="pagina-resumen">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Reportes</span>
+      <h1>Resumen diario</h1>
+      <p>
+        Consulta las operaciones, liquidaciones y cargas de combustible
+        registradas durante una fecha.
+      </p>
+    </div>
+
+    <form
+      class="formulario-fecha"
+      [formGroup]="formularioConsulta"
+      (ngSubmit)="consultarResumen()"
+    >
+      <div class="campo-fecha">
+        <label for="fechaResumen">Fecha</label>
+
+        <input
+          id="fechaResumen"
+          type="date"
+          formControlName="fecha"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="boton-consultar"
+        [disabled]="cargando()"
+      >
+        {{ cargando() ? 'Consultando...' : 'Consultar' }}
+      </button>
+    </form>
+  </header>
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">
+      Consultando el resumen diario...
+    </div>
+  } @else {
+    @if (resumen(); as datos) {
+      <div class="tarjetas-totales">
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">Operaciones</span>
+          <strong>{{ datos.totales.operaciones }}</strong>
+          <small>Registros del día</small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">Kilómetros</span>
+          <strong>
+            {{ datos.totales.kilometrosRecorridos }} km
+          </strong>
+          <small>Recorrido acumulado</small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">Monto liquidado</span>
+          <strong>
+            Q {{ datos.totales.montoLiquidado.toFixed(2) }}
+          </strong>
+          <small>Total reportado</small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">Combustible</span>
+          <strong>
+            Q {{ datos.totales.montoCombustible.toFixed(2) }}
+          </strong>
+          <small>
+            {{ datos.totales.galones.toFixed(3) }} galones
+          </small>
+        </article>
+      </div>
+
+      <section class="detalle-contenedor">
+        <div class="detalle-encabezado">
+          <div>
+            <h2>Detalle de operaciones</h2>
+            <p>
+              Fecha consultada:
+              <strong>{{ datos.fecha }}</strong>
+            </p>
+          </div>
+
+          <span class="cantidad-registros">
+            {{ datos.registros.length }}
+            {{
+              datos.registros.length === 1
+                ? 'operación'
+                : 'operaciones'
+            }}
+          </span>
+        </div>
+
+        @if (datos.registros.length === 0) {
+          <div class="sin-registros">
+            <div class="sin-registros-icono">—</div>
+
+            <h3>No hay operaciones registradas</h3>
+
+            <p>
+              No se encontraron registros diarios para la fecha seleccionada.
+            </p>
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Piloto</th>
+                  <th>Unidad</th>
+                  <th>Km inicial</th>
+                  <th>Km final</th>
+                  <th>Recorrido</th>
+                  <th>Liquidado</th>
+                  <th>Combustible</th>
+                  <th>Galones</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (
+                  registro of datos.registros;
+                  track registro.id
+                ) {
+                  <tr>
+                    <td>
+                      <div class="dato-principal">
+                        <strong>
+                          {{ registro.piloto.nombreCompleto }}
+                        </strong>
+
+                        <small>
+                          {{ registro.piloto.codigo }}
+                        </small>
+                      </div>
+                    </td>
+
+                    <td>
+                      <div class="dato-principal">
+                        <strong>
+                          {{ registro.unidad.numeroUnidad }}
+                        </strong>
+
+                        <small>
+                          {{ registro.unidad.placa }}
+                        </small>
+                      </div>
+                    </td>
+
+                    <td>
+                      {{ registro.kilometrajeInicial }} km
+                    </td>
+
+                    <td>
+                      {{ registro.kilometrajeFinal }} km
+                    </td>
+
+                    <td>
+                      <strong>
+                        {{ obtenerKilometrosRecorridos(registro) }} km
+                      </strong>
+                    </td>
+
+                    <td>
+                      <strong>
+                        Q {{ registro.montoLiquidado }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      @if (tieneCombustible(registro)) {
+                        <strong>
+                          Q
+                          {{
+                            obtenerMontoCombustible(registro).toFixed(2)
+                          }}
+                        </strong>
+                      } @else {
+                        <span class="sin-combustible">
+                          Sin carga
+                        </span>
+                      }
+                    </td>
+
+                    <td>
+                      @if (tieneCombustible(registro)) {
+                        {{
+                          obtenerGalones(registro).toFixed(3)
+                        }}
+                      } @else {
+                        —
+                      }
+                    </td>
+
+                    <td>
+                      <span
+                        class="estado"
+                        [class.estado-pendiente]="
+                          registro.estado ===
+                          'PENDIENTE_COMBUSTIBLE'
+                        "
+                      >
+                        {{ registro.estado.replaceAll('_', ' ') }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  }
+</section>

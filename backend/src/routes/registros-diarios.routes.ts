@@ -20,6 +20,113 @@ interface RegistrarCombustibleBody {
 
 export const registrosDiariosRouter = Router();
 
+// Obtiene el resumen de operaciones de una fecha.
+registrosDiariosRouter.get(
+  '/resumen',
+  async (
+    req: Request<Record<string, never>, unknown, unknown, { fecha?: string }>,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const fecha = req.query.fecha;
+
+      if (!fecha?.trim()) {
+        res.status(400).json({
+          success: false,
+          message: 'La fecha es obligatoria',
+        });
+        return;
+      }
+
+      const fechaConsulta = new Date(`${fecha}T00:00:00.000Z`);
+
+      if (Number.isNaN(fechaConsulta.getTime())) {
+        res.status(400).json({
+          success: false,
+          message: 'La fecha ingresada no es válida',
+        });
+        return;
+      }
+
+      const registros = await prisma.registroDiario.findMany({
+        where: {
+          fecha: fechaConsulta,
+        },
+        include: {
+          piloto: true,
+          unidad: true,
+          cargasCombustible: true,
+        },
+        orderBy: {
+          creadoEn: 'asc',
+        },
+      });
+
+      const totales = registros.reduce(
+        (acumulado, registro) => {
+          const kilometrosRecorridos =
+            registro.kilometrajeFinal -
+            registro.kilometrajeInicial;
+
+          const totalCombustible =
+            registro.cargasCombustible.reduce(
+              (total, carga) => total + Number(carga.monto),
+              0,
+            );
+
+          const totalGalones =
+            registro.cargasCombustible.reduce(
+              (total, carga) => total + Number(carga.galones),
+              0,
+            );
+
+          acumulado.operaciones += 1;
+          acumulado.kilometrosRecorridos += kilometrosRecorridos;
+          acumulado.montoLiquidado += Number(registro.montoLiquidado);
+          acumulado.montoCombustible += totalCombustible;
+          acumulado.galones += totalGalones;
+
+          return acumulado;
+        },
+        {
+          operaciones: 0,
+          kilometrosRecorridos: 0,
+          montoLiquidado: 0,
+          montoCombustible: 0,
+          galones: 0,
+        },
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Resumen diario obtenido correctamente',
+        data: {
+          fecha,
+          totales: {
+            operaciones: totales.operaciones,
+            kilometrosRecorridos: totales.kilometrosRecorridos,
+            montoLiquidado: Number(
+              totales.montoLiquidado.toFixed(2),
+            ),
+            montoCombustible: Number(
+              totales.montoCombustible.toFixed(2),
+            ),
+            galones: Number(totales.galones.toFixed(3)),
+          },
+          registros,
+        },
+      });
+    } catch (error) {
+      console.error('Error al obtener el resumen diario:', error);
+
+      res.status(500).json({
+        success: false,
+        message: 'No fue posible obtener el resumen diario',
+      });
+    }
+  },
+);
+
 // Registra la operación diaria de una unidad.
 registrosDiariosRouter.post(
   '/',

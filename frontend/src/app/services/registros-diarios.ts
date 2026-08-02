@@ -52,6 +52,20 @@ export interface ResultadoCombustible {
   carga: CargaCombustible | null;
 }
 
+export interface TotalesResumenDiario {
+  operaciones: number;
+  kilometrosRecorridos: number;
+  montoLiquidado: number;
+  montoCombustible: number;
+  galones: number;
+}
+
+export interface ResumenDiario {
+  fecha: string;
+  totales: TotalesResumenDiario;
+  registros: RegistroDiario[];
+}
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -83,6 +97,19 @@ export class RegistrosDiariosService {
     return this.http.post<ApiResponse<ResultadoCombustible>>(
       `${this.apiUrl}/${registroId}/combustible`,
       datos,
+    );
+  }
+  obtenerResumen(
+    fecha: string,
+  ): Observable<ApiResponse<ResumenDiario>> {
+    return this.http.get<ApiResponse<ResumenDiario>>(
+      `${this.apiUrl}/resumen`,
+      {
+        params:
+        {
+          fecha,
+        },
+      },
     );
   }
 }
