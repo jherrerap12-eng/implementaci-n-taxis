@@ -5,6 +5,7 @@ import express, { type Request, type Response } from 'express';
 import { prisma } from './lib/prisma.js';
 import { pilotosRouter } from './routes/pilotos.routes.js';
 import { unidadesRouter } from './routes/unidades.routes.js';
+import { registrosDiariosRouter } from './routes/registros-diarios.routes.js';
 
 dotenv.config();
 
@@ -13,7 +14,10 @@ const PORT = Number(process.env.PORT) || 3000;
 
 app.use(
   cors({
-    origin: 'http://localhost:4200',
+    origin: [
+      /^http:\/\/localhost:\d+$/,
+      /^http:\/\/127\.0\.0\.1:\d+$/,
+    ],
   }),
 );
 
@@ -21,6 +25,7 @@ app.use(express.json());
 
 app.use('/api/pilotos', pilotosRouter);
 app.use('/api/unidades', unidadesRouter);
+app.use('/api/registros-diarios', registrosDiariosRouter);
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({

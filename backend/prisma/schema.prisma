@@ -36,6 +36,8 @@ model Piloto {
   creadoEn            DateTime     @default(now()) @map("creado_en")
   actualizadoEn       DateTime     @updatedAt @map("actualizado_en")
 
+  registrosDiarios RegistroDiario[]
+
   @@map("pilotos")
 }
 
@@ -53,5 +55,49 @@ model Unidad {
   creadoEn          DateTime        @default(now()) @map("creado_en")
   actualizadoEn     DateTime        @updatedAt @map("actualizado_en")
 
+  registrosDiarios RegistroDiario[]
+
   @@map("unidades")
+}
+
+enum EstadoRegistroDiario {
+  PENDIENTE_COMBUSTIBLE
+  COMPLETADO
+}
+
+model RegistroDiario {
+  id                 Int                  @id @default(autoincrement())
+  pilotoId           Int                  @map("piloto_id")
+  unidadId           Int                  @map("unidad_id")
+  fecha              DateTime             @db.Date
+  kilometrajeInicial Int                  @map("kilometraje_inicial")
+  kilometrajeFinal   Int                  @map("kilometraje_final")
+  montoLiquidado     Decimal              @map("monto_liquidado") @db.Decimal(12, 2)
+  estado             EstadoRegistroDiario @default(PENDIENTE_COMBUSTIBLE)
+  observaciones      String?
+  creadoEn           DateTime             @default(now()) @map("creado_en")
+  actualizadoEn      DateTime             @updatedAt @map("actualizado_en")
+
+  piloto            Piloto             @relation(fields: [pilotoId], references: [id])
+  unidad            Unidad             @relation(fields: [unidadId], references: [id])
+  cargasCombustible CargaCombustible[]
+
+  @@index([fecha])
+  @@index([pilotoId])
+  @@index([unidadId])
+  @@map("registros_diarios")
+}
+
+model CargaCombustible {
+  id               Int      @id @default(autoincrement())
+  registroDiarioId Int      @map("registro_diario_id")
+  monto            Decimal  @db.Decimal(12, 2)
+  galones          Decimal  @db.Decimal(10, 3)
+  precioGalon      Decimal  @map("precio_galon") @db.Decimal(10, 2)
+  creadoEn         DateTime @default(now()) @map("creado_en")
+
+  registroDiario RegistroDiario @relation(fields: [registroDiarioId], references: [id], onDelete: Cascade)
+
+  @@index([registroDiarioId])
+  @@map("cargas_combustible")
 }

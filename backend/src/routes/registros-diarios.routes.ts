@@ -1,0 +1,386 @@
+import { Router, type Request, type Response } from 'express';
+
+import { prisma } from '../lib/prisma.js';
+
+interface CrearRegistroDiarioBody {
+  pilotoId?: number | string;
+  unidadId?: number | string;
+  fecha?: string;
+  kilometrajeFinal?: number | string;
+  montoLiquidado?: number | string;
+  observaciones?: string;
+}
+
+interface RegistrarCombustibleBody {
+  sinCombustible?: boolean;
+  monto?: number | string;
+  galones?: number | string;
+  precioGalon?: number | string;
+}
+
+export const registrosDiariosRouter = Router();
+
+// Registra la operación diaria de una unidad.
+registrosDiariosRouter.post(
+  '/',
+  async (
+    req: Request<Record<string, never>, unknown, CrearRegistroDiarioBody>,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const {
+        pilotoId,
+        unidadId,
+        fecha,
+        kilometrajeFinal,
+        montoLiquidado,
+        observaciones,
+      } = req.body;
+
+      if (
+        pilotoId === undefined ||
+        unidadId === undefined ||
+        !fecha?.trim() ||
+        kilometrajeFinal === undefined ||
+        montoLiquidado === undefined
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'Completa todos los campos obligatorios',
+        });
+        return;
+      }
+
+      const pilotoIdConvertido = Number(pilotoId);
+      const unidadIdConvertido = Number(unidadId);
+      const kilometrajeFinalConvertido = Number(kilometrajeFinal);
+      const montoLiquidadoConvertido = Number(montoLiquidado);
+
+      if (
+        !Number.isInteger(pilotoIdConvertido) ||
+        !Number.isInteger(unidadIdConvertido)
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'El piloto o la unidad seleccionada no son válidos',
+        });
+        return;
+      }
+
+      if (
+        !Number.isInteger(kilometrajeFinalConvertido) ||
+        kilometrajeFinalConvertido < 0
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'El kilometraje final debe ser un número entero válido',
+        });
+        return;
+      }
+
+      if (
+        !Number.isFinite(montoLiquidadoConvertido) ||
+        montoLiquidadoConvertido < 0
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'El monto liquidado debe ser un número válido',
+        });
+        return;
+      }
+
+      const fechaRegistro = new Date(`${fecha}T00:00:00.000Z`);
+
+      if (Number.isNaN(fechaRegistro.getTime())) {
+        res.status(400).json({
+          success: false,
+          message: 'La fecha ingresada no es válida',
+        });
+        return;
+      }
+
+      const [piloto, unidad] = await Promise.all([
+        prisma.piloto.findUnique({
+          where: {
+            id: pilotoIdConvertido,
+          },
+        }),
+
+        prisma.unidad.findUnique({
+          where: {
+            id: unidadIdConvertido,
+          },
+        }),
+      ]);
+
+      if (!piloto) {
+        res.status(404).json({
+          success: false,
+          message: 'El piloto seleccionado no existe',
+        });
+        return;
+      }
+
+      if (!unidad) {
+        res.status(404).json({
+          success: false,
+          message: 'La unidad seleccionada no existe',
+        });
+        return;
+      }
+
+      if (piloto.estado !== 'ACTIVO') {
+        res.status(400).json({
+          success: false,
+          message: 'El piloto seleccionado se encuentra inactivo',
+        });
+        return;
+      }
+
+      if (unidad.estado !== 'DISPONIBLE') {
+        res.status(400).json({
+          success: false,
+          message: 'La unidad seleccionada no está disponible',
+        });
+        return;
+      }
+
+      const kilometrajeInicial = unidad.kilometrajeActual;
+
+      if (kilometrajeFinalConvertido < kilometrajeInicial) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El kilometraje final no puede ser menor al kilometraje actual de la unidad',
+        });
+        return;
+      }
+
+      const registro = await prisma.$transaction(async (transaccion) => {
+        const nuevoRegistro = await transaccion.registroDiario.create({
+          data: {
+            pilotoId: pilotoIdConvertido,
+            unidadId: unidadIdConvertido,
+            fecha: fechaRegistro,
+            kilometrajeInicial,
+            kilometrajeFinal: kilometrajeFinalConvertido,
+            montoLiquidado: montoLiquidadoConvertido.toFixed(2),
+            observaciones: observaciones?.trim() || null,
+          },
+          include: {
+            piloto: true,
+            unidad: true,
+          },
+        });
+
+        await transaccion.unidad.update({
+          where: {
+            id: unidadIdConvertido,
+          },
+          data: {
+            kilometrajeActual: kilometrajeFinalConvertido,
+          },
+        });
+
+        return nuevoRegistro;
+      });
+
+      res.status(201).json({
+        success: true,
+        message:
+          'Registro diario guardado. Continúa con el registro de combustible',
+        data: registro,
+      });
+    } catch (error) {
+      console.error('Error al registrar la operación diaria:', error);
+
+      res.status(500).json({
+        success: false,
+        message: 'No fue posible guardar el registro diario',
+      });
+    }
+  },
+  
+);
+// Registra el combustible y completa la operación diaria.
+registrosDiariosRouter.post(
+  '/:id/combustible',
+  async (
+    req: Request<
+      { id: string },
+      unknown,
+      RegistrarCombustibleBody
+    >,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const registroId = Number(req.params.id);
+
+      if (!Number.isInteger(registroId) || registroId <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'El identificador del registro no es válido',
+        });
+        return;
+      }
+
+      const registroExistente =
+        await prisma.registroDiario.findUnique({
+          where: {
+            id: registroId,
+          },
+        });
+
+      if (!registroExistente) {
+        res.status(404).json({
+          success: false,
+          message: 'El registro diario no existe',
+        });
+        return;
+      }
+
+      if (registroExistente.estado === 'COMPLETADO') {
+        res.status(409).json({
+          success: false,
+          message: 'Este registro diario ya fue completado',
+        });
+        return;
+      }
+
+      const {
+        sinCombustible = false,
+        monto,
+        galones,
+        precioGalon,
+      } = req.body;
+
+      // Permite completar el registro cuando la unidad no cargó combustible.
+      if (sinCombustible) {
+        const registroActualizado =
+          await prisma.registroDiario.update({
+            where: {
+              id: registroId,
+            },
+            data: {
+              estado: 'COMPLETADO',
+            },
+            include: {
+              piloto: true,
+              unidad: true,
+              cargasCombustible: true,
+            },
+          });
+
+        res.status(200).json({
+          success: true,
+          message:
+            'Operación completada sin carga de combustible',
+          data: {
+            registro: registroActualizado,
+            carga: null,
+          },
+        });
+
+        return;
+      }
+
+      if (
+        monto === undefined ||
+        galones === undefined ||
+        precioGalon === undefined
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'Monto, galones y precio por galón son obligatorios',
+        });
+        return;
+      }
+
+      const montoConvertido = Number(monto);
+      const galonesConvertidos = Number(galones);
+      const precioGalonConvertido = Number(precioGalon);
+
+      if (
+        !Number.isFinite(montoConvertido) ||
+        montoConvertido <= 0 ||
+        !Number.isFinite(galonesConvertidos) ||
+        galonesConvertidos <= 0 ||
+        !Number.isFinite(precioGalonConvertido) ||
+        precioGalonConvertido <= 0
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'Los valores de combustible deben ser mayores que cero',
+        });
+        return;
+      }
+
+      const montoCalculado =
+        galonesConvertidos * precioGalonConvertido;
+
+      if (Math.abs(montoConvertido - montoCalculado) > 0.05) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El monto no coincide con los galones y el precio por galón',
+        });
+        return;
+      }
+
+      const resultado = await prisma.$transaction(
+        async (transaccion) => {
+          const carga =
+            await transaccion.cargaCombustible.create({
+              data: {
+                registroDiarioId: registroId,
+                monto: montoConvertido.toFixed(2),
+                galones: galonesConvertidos.toFixed(3),
+                precioGalon:
+                  precioGalonConvertido.toFixed(2),
+              },
+            });
+
+          const registroActualizado =
+            await transaccion.registroDiario.update({
+              where: {
+                id: registroId,
+              },
+              data: {
+                estado: 'COMPLETADO',
+              },
+              include: {
+                piloto: true,
+                unidad: true,
+                cargasCombustible: true,
+              },
+            });
+
+          return {
+            registro: registroActualizado,
+            carga,
+          };
+        },
+      );
+
+      res.status(201).json({
+        success: true,
+        message:
+          'Combustible registrado y operación completada',
+        data: resultado,
+      });
+    } catch (error) {
+      console.error(
+        'Error al registrar el combustible:',
+        error,
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          'No fue posible registrar el combustible',
+      });
+    }
+  },
+);
