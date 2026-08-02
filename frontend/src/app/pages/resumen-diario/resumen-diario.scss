@@ -327,3 +327,24 @@ tbody tr:last-child td {
     font-size: 26px;
   }
 }
+.boton-continuar {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: #f59e0b;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.boton-continuar:hover {
+  background: #d97706;
+}
+
+.accion-completada {
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 700;
+}
