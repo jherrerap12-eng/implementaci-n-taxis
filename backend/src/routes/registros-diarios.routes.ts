@@ -126,7 +126,61 @@ registrosDiariosRouter.get(
     }
   },
 );
+// Obtiene un registro diario específico por su identificador.
+registrosDiariosRouter.get(
+  '/:id',
+  async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const registroId = Number(req.params.id);
 
+      if (!Number.isInteger(registroId) || registroId <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'El identificador del registro no es válido',
+        });
+        return;
+      }
+
+      const registro = await prisma.registroDiario.findUnique({
+        where: {
+          id: registroId,
+        },
+        include: {
+          piloto: true,
+          unidad: true,
+          cargasCombustible: true,
+        },
+      });
+
+      if (!registro) {
+        res.status(404).json({
+          success: false,
+          message: 'El registro diario no existe',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Registro diario obtenido correctamente',
+        data: registro,
+      });
+    } catch (error) {
+      console.error(
+        'Error al consultar el registro diario:',
+        error,
+      );
+
+      res.status(500).json({
+        success: false,
+        message: 'No fue posible consultar el registro diario',
+      });
+    }
+  },
+);
 // Registra la operación diaria de una unidad.
 registrosDiariosRouter.post(
   '/',

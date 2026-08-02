@@ -112,4 +112,11 @@ export class RegistrosDiariosService {
       },
     );
   }
+    obtenerPorId(
+    registroId: number,
+  ): Observable<ApiResponse<RegistroDiario>> {
+    return this.http.get<ApiResponse<RegistroDiario>>(
+      `${this.apiUrl}/${registroId}`,
+    );
+  }
 }

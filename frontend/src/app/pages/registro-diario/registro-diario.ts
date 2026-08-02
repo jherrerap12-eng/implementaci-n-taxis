@@ -4,6 +4,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import {
@@ -33,6 +34,8 @@ export class RegistroDiarioComponent implements OnInit {
   private readonly pilotosService = inject(PilotosService);
   private readonly unidadesService = inject(UnidadesService);
   private readonly registrosService = inject(RegistrosDiariosService);
+  private readonly rutaActiva = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly pilotos = signal<Piloto[]>([]);
   readonly unidades = signal<Unidad[]>([]);
@@ -112,7 +115,66 @@ export class RegistroDiarioComponent implements OnInit {
     });
 
   ngOnInit(): void {
+    const registroId = Number(
+      this.rutaActiva.snapshot.queryParamMap.get('registroId'),
+    );
+
+    if (Number.isInteger(registroId) && registroId > 0) {
+      this.cargarRegistroPendiente(registroId);
+      return;
+    }
+
     this.cargarCatalogos();
+  }
+
+  cargarRegistroPendiente(registroId: number): void {
+    this.cargando.set(true);
+    this.mensajeError.set('');
+    this.mensajeExito.set('');
+
+    this.registrosService.obtenerPorId(registroId).subscribe({
+      next: (respuesta) => {
+        const registro = respuesta.data;
+
+        if (registro.estado !== 'PENDIENTE_COMBUSTIBLE') {
+          this.cargarCatalogos();
+
+          this.mensajeError.set(
+            'Esta operación ya fue completada y no tiene combustible pendiente',
+          );
+
+          return;
+        }
+
+        this.registroCreado.set(registro);
+        this.resultadoCombustible.set(null);
+        this.kilometrajeInicial.set(
+          registro.kilometrajeInicial,
+        );
+
+        this.formularioCombustible.reset({
+          sinCombustible: false,
+          galones: 0,
+          precioGalon: 0,
+        });
+
+        this.montoCombustible.set(0);
+        this.cargando.set(false);
+      },
+      error: (error) => {
+        console.error(
+          'Error al recuperar el registro pendiente:',
+          error,
+        );
+
+        this.cargarCatalogos();
+
+        this.mensajeError.set(
+          error.error?.message ||
+            'No fue posible recuperar la operación pendiente',
+        );
+      },
+    });
   }
 
   cargarCatalogos(): void {
@@ -381,6 +443,8 @@ export class RegistroDiarioComponent implements OnInit {
   }
 
   iniciarNuevoRegistro(): void {
+    void this.router.navigate(['/registro-diario']);
+
     this.registroCreado.set(null);
     this.resultadoCombustible.set(null);
     this.kilometrajeInicial.set(null);

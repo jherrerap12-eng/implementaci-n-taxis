@@ -124,6 +124,7 @@
                   <th>Combustible</th>
                   <th>Galones</th>
                   <th>Estado</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
 
@@ -213,6 +214,21 @@
                         {{ registro.estado.replaceAll('_', ' ') }}
                       </span>
                     </td>
+                    <td>
+  @if (registro.estado === 'PENDIENTE_COMBUSTIBLE') {
+    <button
+      type="button"
+      class="boton-continuar"
+      (click)="continuarCombustible(registro.id)"
+    >
+      Continuar combustible
+    </button>
+  } @else {
+    <span class="accion-completada">
+      Finalizado
+    </span>
+  }
+</td>
                   </tr>
                 }
               </tbody>

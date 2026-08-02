@@ -4,6 +4,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import {
   RegistroDiario,
@@ -22,6 +23,7 @@ export class ResumenDiarioComponent implements OnInit {
   private readonly registrosService = inject(
     RegistrosDiariosService,
   );
+  private readonly router = inject(Router);
 
   readonly resumen = signal<ResumenDiarioDatos | null>(null);
   readonly cargando = signal(false);
@@ -72,6 +74,17 @@ export class ResumenDiarioComponent implements OnInit {
         this.cargando.set(false);
       },
     });
+  }
+
+  continuarCombustible(registroId: number): void {
+    void this.router.navigate(
+      ['/registro-diario'],
+      {
+        queryParams: {
+          registroId,
+        },
+      },
+    );
   }
 
   obtenerKilometrosRecorridos(
