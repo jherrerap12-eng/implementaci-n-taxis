@@ -1,15 +1,1 @@
-<main>
-  <h1>Sistema de Gestión de Flotilla de Taxis</h1>
-
-  <section>
-    <h2>Estado de conexión</h2>
-  
-    <p>{{ mensaje() }}</p>
-
-    @if (conectado()) {
-      <p> Angular y Node.js están conectados correctamente.</p>
-    } @else {
-      <p> Verifique que el backend esté ejecutándose.</p>
-    }
-  </section>
-</main>
+<router-outlet />

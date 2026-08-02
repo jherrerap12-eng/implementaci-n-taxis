@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express, { type Request, type Response } from 'express';
 
 import { prisma } from './lib/prisma.js';
+import { pilotosRouter } from './routes/pilotos.routes.js';
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use('/api/pilotos', pilotosRouter);
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({

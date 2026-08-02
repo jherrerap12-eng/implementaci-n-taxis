@@ -1,0 +1,226 @@
+<section class="pagina-pilotos">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Administración</span>
+      <h1>Gestión de pilotos</h1>
+      <p>Consulta y registra los pilotos de la flotilla.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <button
+        type="button"
+        class="boton-secundario"
+        (click)="cargarPilotos()"
+        [disabled]="cargando()"
+      >
+        {{ cargando() ? 'Actualizando...' : 'Actualizar listado' }}
+      </button>
+
+      <button
+        type="button"
+        class="boton-principal"
+        (click)="abrirFormulario()"
+      >
+        Registrar piloto
+      </button>
+    </div>
+  </header>
+
+  @if (mensajeExito()) {
+    <div class="mensaje-exito">
+      {{ mensajeExito() }}
+    </div>
+  }
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  @if (mostrarFormulario()) {
+    <div class="formulario-contenedor">
+      <div class="formulario-encabezado">
+        <div>
+          <h2>Registrar nuevo piloto</h2>
+          <p>Completa los datos obligatorios del piloto.</p>
+        </div>
+
+        <button
+          type="button"
+          class="boton-cerrar"
+          (click)="cerrarFormulario()"
+        >
+          ×
+        </button>
+      </div>
+
+      <form
+        [formGroup]="formularioPiloto"
+        (ngSubmit)="registrarPiloto()"
+      >
+        <div class="campos">
+          <div class="campo">
+            <label for="codigo">Código *</label>
+            <input
+              id="codigo"
+              type="text"
+              formControlName="codigo"
+              placeholder="Ejemplo: P-002"
+            />
+
+            @if (
+              formularioPiloto.controls.codigo.touched &&
+              formularioPiloto.controls.codigo.invalid
+            ) {
+              <small>El código es obligatorio.</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="nombreCompleto">Nombre completo *</label>
+            <input
+              id="nombreCompleto"
+              type="text"
+              formControlName="nombreCompleto"
+              placeholder="Nombre y apellidos"
+            />
+
+            @if (
+              formularioPiloto.controls.nombreCompleto.touched &&
+              formularioPiloto.controls.nombreCompleto.invalid
+            ) {
+              <small>El nombre completo es obligatorio.</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="telefono">Teléfono</label>
+            <input
+              id="telefono"
+              type="text"
+              formControlName="telefono"
+              placeholder="Ejemplo: 5555-1234"
+            />
+          </div>
+
+          <div class="campo">
+            <label for="numeroLicencia">Número de licencia *</label>
+            <input
+              id="numeroLicencia"
+              type="text"
+              formControlName="numeroLicencia"
+              placeholder="Ejemplo: LIC-002"
+            />
+
+            @if (
+              formularioPiloto.controls.numeroLicencia.touched &&
+              formularioPiloto.controls.numeroLicencia.invalid
+            ) {
+              <small>El número de licencia es obligatorio.</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="vencimientoLicencia">
+              Vencimiento de licencia *
+            </label>
+
+            <input
+              id="vencimientoLicencia"
+              type="date"
+              formControlName="vencimientoLicencia"
+            />
+
+            @if (
+              formularioPiloto.controls.vencimientoLicencia.touched &&
+              formularioPiloto.controls.vencimientoLicencia.invalid
+            ) {
+              <small>La fecha de vencimiento es obligatoria.</small>
+            }
+          </div>
+
+          <div class="campo campo-completo">
+            <label for="observaciones">Observaciones</label>
+            <textarea
+              id="observaciones"
+              rows="3"
+              formControlName="observaciones"
+              placeholder="Información adicional del piloto"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="acciones-formulario">
+          <button
+            type="button"
+            class="boton-cancelar"
+            (click)="cerrarFormulario()"
+            [disabled]="guardando()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            class="boton-principal"
+            [disabled]="guardando()"
+          >
+            {{ guardando() ? 'Guardando...' : 'Guardar piloto' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">
+      Cargando pilotos...
+    </div>
+  } @else {
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre completo</th>
+            <th>Teléfono</th>
+            <th>Licencia</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (piloto of pilotos(); track piloto.id) {
+            <tr>
+              <td>
+                <strong>{{ piloto.codigo }}</strong>
+              </td>
+
+              <td>{{ piloto.nombreCompleto }}</td>
+              <td>{{ piloto.telefono || 'No registrado' }}</td>
+              <td>{{ piloto.numeroLicencia }}</td>
+              <td>{{ piloto.vencimientoLicencia.slice(0, 10) }}</td>
+
+              <td>
+                <span
+                  class="estado"
+                  [class.estado-inactivo]="piloto.estado === 'INACTIVO'"
+                >
+                  {{ piloto.estado }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="sin-registros">
+                No hay pilotos registrados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

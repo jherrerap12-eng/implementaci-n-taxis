@@ -1,3 +1,20 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { Pilotos } from './pages/pilotos/pilotos';
+
+export const routes: Routes = [
+  {
+    path: 'pilotos',
+    component: Pilotos,
+    title: 'Pilotos | Sistema de flotilla',
+  },
+  {
+    path: '',
+    redirectTo: 'pilotos',
+    pathMatch: 'full',
+  },
+  {
+    path: '**',
+    redirectTo: 'pilotos',
+  },
+];
