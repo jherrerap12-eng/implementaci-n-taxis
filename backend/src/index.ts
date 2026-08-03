@@ -6,6 +6,7 @@ import { prisma } from './lib/prisma.js';
 import { pilotosRouter } from './routes/pilotos.routes.js';
 import { unidadesRouter } from './routes/unidades.routes.js';
 import { registrosDiariosRouter } from './routes/registros-diarios.routes.js';
+import { ingresosRouter } from './routes/ingresos.routes.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use('/api/pilotos', pilotosRouter);
 app.use('/api/unidades', unidadesRouter);
 app.use('/api/registros-diarios', registrosDiariosRouter);
+app.use('/api/ingresos', ingresosRouter);
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({

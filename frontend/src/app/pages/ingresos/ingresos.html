@@ -1,0 +1,383 @@
+<section class="pagina-ingresos">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Reportes</span>
+      <h1>Ingresos</h1>
+      <p>
+        Consulta los montos liquidados, recorridos y consumo de combustible
+        durante un período.
+      </p>
+    </div>
+
+    <form
+      class="formulario-fecha"
+      [formGroup]="formularioConsulta"
+      (ngSubmit)="consultarIngresos()"
+    >
+      <div class="campo-fecha">
+        <label for="fechaFinIngresos">
+          Fecha final
+        </label>
+
+        <input
+          id="fechaFinIngresos"
+          type="date"
+          formControlName="fechaFin"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="boton-consultar"
+        [disabled]="cargando()"
+      >
+        {{ cargando() ? 'Consultando...' : 'Consultar' }}
+      </button>
+    </form>
+  </header>
+
+  <div class="periodos">
+    <button
+      type="button"
+      [class.periodo-activo]="periodoSeleccionado() === 1"
+      (click)="seleccionarPeriodo(1)"
+      [disabled]="cargando()"
+    >
+      Hoy
+    </button>
+
+    <button
+      type="button"
+      [class.periodo-activo]="periodoSeleccionado() === 7"
+      (click)="seleccionarPeriodo(7)"
+      [disabled]="cargando()"
+    >
+      7 días
+    </button>
+
+    <button
+      type="button"
+      [class.periodo-activo]="periodoSeleccionado() === 15"
+      (click)="seleccionarPeriodo(15)"
+      [disabled]="cargando()"
+    >
+      15 días
+    </button>
+
+    <button
+      type="button"
+      [class.periodo-activo]="periodoSeleccionado() === 30"
+      (click)="seleccionarPeriodo(30)"
+      [disabled]="cargando()"
+    >
+      30 días
+    </button>
+  </div>
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">
+      Consultando información de ingresos...
+    </div>
+  } @else {
+    @if (resumen(); as datos) {
+      <section class="periodo-consultado">
+        <div>
+          <span>Período consultado</span>
+          <strong>{{ obtenerEtiquetaPeriodo() }}</strong>
+        </div>
+
+        <p>
+          Desde
+          <strong>{{ datos.periodo.fechaInicio }}</strong>
+          hasta
+          <strong>{{ datos.periodo.fechaFin }}</strong>
+        </p>
+      </section>
+
+      <div class="tarjetas-totales">
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Monto liquidado
+          </span>
+
+          <strong>
+            Q {{ datos.totales.montoLiquidado.toFixed(2) }}
+          </strong>
+
+          <small>
+            Total reportado durante el período
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Combustible
+          </span>
+
+          <strong>
+            Q {{ datos.totales.montoCombustible.toFixed(2) }}
+          </strong>
+
+          <small>
+            {{ datos.totales.galones.toFixed(3) }} galones
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Operaciones
+          </span>
+
+          <strong>
+            {{ datos.totales.operaciones }}
+          </strong>
+
+          <small>
+            Registros encontrados
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Kilómetros recorridos
+          </span>
+
+          <strong>
+            {{ datos.totales.kilometrosRecorridos }} km
+          </strong>
+
+          <small>
+            Recorrido acumulado
+          </small>
+        </article>
+      </div>
+
+      <section class="bloque-reporte">
+        <div class="bloque-encabezado">
+          <div>
+            <h2>Resultados por día</h2>
+            <p>
+              Totales acumulados para cada fecha del período.
+            </p>
+          </div>
+
+          <span class="cantidad-registros">
+            {{ datos.porDia.length }}
+            {{ datos.porDia.length === 1 ? 'día' : 'días' }}
+          </span>
+        </div>
+
+        @if (datos.porDia.length === 0) {
+          <div class="sin-registros">
+            No hay información registrada en este período.
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Operaciones</th>
+                  <th>Kilómetros</th>
+                  <th>Liquidado</th>
+                  <th>Combustible</th>
+                  <th>Galones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (dia of datos.porDia; track dia.fecha) {
+                  <tr>
+                    <td>
+                      <strong>{{ dia.fecha }}</strong>
+                    </td>
+
+                    <td>{{ dia.operaciones }}</td>
+
+                    <td>
+                      {{ dia.kilometrosRecorridos }} km
+                    </td>
+
+                    <td>
+                      <strong>
+                        Q {{ dia.montoLiquidado.toFixed(2) }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      Q {{ dia.montoCombustible.toFixed(2) }}
+                    </td>
+
+                    <td>
+                      {{ dia.galones.toFixed(3) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="bloque-reporte">
+        <div class="bloque-encabezado">
+          <div>
+            <h2>Resultados por unidad</h2>
+            <p>
+              Rendimiento acumulado de cada vehículo.
+            </p>
+          </div>
+
+          <span class="cantidad-registros">
+            {{ datos.porUnidad.length }}
+            {{
+              datos.porUnidad.length === 1
+                ? 'unidad'
+                : 'unidades'
+            }}
+          </span>
+        </div>
+
+        @if (datos.porUnidad.length === 0) {
+          <div class="sin-registros">
+            No hay unidades con operaciones en este período.
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Unidad</th>
+                  <th>Placa</th>
+                  <th>Operaciones</th>
+                  <th>Kilómetros</th>
+                  <th>Liquidado</th>
+                  <th>Combustible</th>
+                  <th>Galones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (
+                  unidad of datos.porUnidad;
+                  track unidad.unidadId
+                ) {
+                  <tr>
+                    <td>
+                      <strong>{{ unidad.numeroUnidad }}</strong>
+                    </td>
+
+                    <td>{{ unidad.placa }}</td>
+
+                    <td>{{ unidad.operaciones }}</td>
+
+                    <td>
+                      {{ unidad.kilometrosRecorridos }} km
+                    </td>
+
+                    <td>
+                      <strong>
+                        Q {{ unidad.montoLiquidado.toFixed(2) }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      Q {{ unidad.montoCombustible.toFixed(2) }}
+                    </td>
+
+                    <td>
+                      {{ unidad.galones.toFixed(3) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="bloque-reporte">
+        <div class="bloque-encabezado">
+          <div>
+            <h2>Resultados por piloto</h2>
+            <p>
+              Operaciones y montos agrupados por conductor.
+            </p>
+          </div>
+
+          <span class="cantidad-registros">
+            {{ datos.porPiloto.length }}
+            {{
+              datos.porPiloto.length === 1
+                ? 'piloto'
+                : 'pilotos'
+            }}
+          </span>
+        </div>
+
+        @if (datos.porPiloto.length === 0) {
+          <div class="sin-registros">
+            No hay pilotos con operaciones en este período.
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Piloto</th>
+                  <th>Código</th>
+                  <th>Operaciones</th>
+                  <th>Kilómetros</th>
+                  <th>Liquidado</th>
+                  <th>Combustible</th>
+                  <th>Galones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (
+                  piloto of datos.porPiloto;
+                  track piloto.pilotoId
+                ) {
+                  <tr>
+                    <td>
+                      <strong>{{ piloto.nombreCompleto }}</strong>
+                    </td>
+
+                    <td>{{ piloto.codigo }}</td>
+
+                    <td>{{ piloto.operaciones }}</td>
+
+                    <td>
+                      {{ piloto.kilometrosRecorridos }} km
+                    </td>
+
+                    <td>
+                      <strong>
+                        Q {{ piloto.montoLiquidado.toFixed(2) }}
+                      </strong>
+                    </td>
+
+                    <td>
+                      Q {{ piloto.montoCombustible.toFixed(2) }}
+                    </td>
+
+                    <td>
+                      {{ piloto.galones.toFixed(3) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  }
+</section>

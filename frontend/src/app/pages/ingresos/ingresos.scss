@@ -1,0 +1,350 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+.pagina-ingresos {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.seccion {
+  display: block;
+  margin-bottom: 6px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+p {
+  margin: 8px 0 0;
+  color: #64748b;
+}
+
+.formulario-fecha {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.campo-fecha {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-fecha label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campo-fecha input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: white;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.campo-fecha input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.boton-consultar {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-consultar:hover {
+  background: #1d4ed8;
+}
+
+.boton-consultar:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.periodos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.periodos button {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: white;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.periodos button:hover {
+  background: #f8fafc;
+}
+
+.periodos button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.periodos .periodo-activo {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.mensaje-error {
+  margin-bottom: 20px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 14px 18px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.estado-carga {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 28px;
+  background: white;
+  color: #64748b;
+  text-align: center;
+}
+
+.periodo-consultado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 15px 18px;
+  background: #eff6ff;
+}
+
+.periodo-consultado span,
+.periodo-consultado strong {
+  display: block;
+}
+
+.periodo-consultado span {
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.periodo-consultado strong {
+  color: #1e40af;
+  font-size: 15px;
+}
+
+.periodo-consultado p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.tarjetas-totales {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.tarjeta {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+}
+
+.tarjeta-etiqueta {
+  display: block;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tarjeta strong {
+  display: block;
+  color: #1e293b;
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.tarjeta small {
+  display: block;
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.bloque-reporte {
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+  overflow: hidden;
+}
+
+.bloque-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bloque-encabezado h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 21px;
+}
+
+.bloque-encabezado p {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.cantidad-registros {
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+td {
+  color: #334155;
+  font-size: 13px;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sin-registros {
+  padding: 35px 24px;
+  color: #64748b;
+  text-align: center;
+}
+
+@media (max-width: 950px) {
+  .tarjetas-totales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .pagina-ingresos {
+    padding: 24px 14px;
+  }
+
+  .encabezado {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .formulario-fecha {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .boton-consultar {
+    width: 100%;
+  }
+
+  .periodos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .periodos button {
+    width: 100%;
+  }
+
+  .periodo-consultado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tarjetas-totales {
+    grid-template-columns: 1fr;
+  }
+
+  .bloque-encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
