@@ -9,6 +9,11 @@ export interface TotalesIngresos {
   montoCombustible: number;
   galones: number;
 }
+export interface TotalesGeneralesIngresos
+  extends TotalesIngresos {
+  pendientesCombustible: number;
+  unidadesDisponibles: number;
+}
 
 export interface PeriodoIngresos {
   dias: number;
@@ -34,7 +39,7 @@ export interface IngresosPorPiloto extends TotalesIngresos {
 
 export interface ResumenIngresos {
   periodo: PeriodoIngresos;
-  totales: TotalesIngresos;
+  totales: TotalesGeneralesIngresos;
   porDia: IngresosPorDia[];
   porUnidad: IngresosPorUnidad[];
   porPiloto: IngresosPorPiloto[];
