@@ -1,0 +1,252 @@
+<section class="pagina-dashboard">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Panel principal</span>
+      <h1>Resumen de la flotilla</h1>
+
+      <p>
+        Información general de las operaciones registradas durante el día.
+      </p>
+    </div>
+
+    <div class="fecha-actual">
+      <span>Fecha consultada</span>
+      <strong>{{ fechaActual }}</strong>
+    </div>
+  </header>
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      <span>{{ mensajeError() }}</span>
+
+      <button
+        type="button"
+        (click)="cargarDashboard()"
+      >
+        Reintentar
+      </button>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">
+      Cargando información del panel principal...
+    </div>
+  } @else {
+    @if (resumen(); as datos) {
+      <section class="tarjetas-resumen">
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Operaciones del día
+          </span>
+
+          <strong>
+            {{ datos.totales.operaciones }}
+          </strong>
+
+          <small>
+            Registros realizados
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Monto liquidado
+          </span>
+
+          <strong>
+            Q {{ datos.totales.montoLiquidado.toFixed(2) }}
+          </strong>
+
+          <small>
+            Total reportado hoy
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Combustible
+          </span>
+
+          <strong>
+            Q {{ datos.totales.montoCombustible.toFixed(2) }}
+          </strong>
+
+          <small>
+            {{ datos.totales.galones.toFixed(3) }} galones
+          </small>
+        </article>
+
+        <article class="tarjeta">
+          <span class="tarjeta-etiqueta">
+            Kilómetros recorridos
+          </span>
+
+          <strong>
+            {{ datos.totales.kilometrosRecorridos }} km
+          </strong>
+
+          <small>
+            Recorrido acumulado del día
+          </small>
+        </article>
+      </section>
+
+      <section class="accesos-rapidos">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Accesos rápidos</h2>
+            <p>
+              Ingresa directamente a las funciones principales del sistema.
+            </p>
+          </div>
+        </div>
+
+        <div class="accesos-grid">
+          <a
+            routerLink="/registro-diario"
+            class="acceso"
+          >
+            <span class="acceso-numero">01</span>
+
+            <div>
+              <strong>Registrar operación</strong>
+
+              <p>
+                Registra el recorrido, monto liquidado y combustible.
+              </p>
+            </div>
+          </a>
+
+          <a
+            routerLink="/resumen-diario"
+            class="acceso"
+          >
+            <span class="acceso-numero">02</span>
+
+            <div>
+              <strong>Resumen diario</strong>
+
+              <p>
+                Consulta las operaciones y registros pendientes.
+              </p>
+            </div>
+          </a>
+
+          <a
+            routerLink="/ingresos"
+            class="acceso"
+          >
+            <span class="acceso-numero">03</span>
+
+            <div>
+              <strong>Ingresos</strong>
+
+              <p>
+                Revisa resultados de hoy, 7, 15 y 30 días.
+              </p>
+            </div>
+          </a>
+
+          <a
+            routerLink="/unidades"
+            class="acceso"
+          >
+            <span class="acceso-numero">04</span>
+
+            <div>
+              <strong>Unidades</strong>
+
+              <p>
+                Administra los vehículos registrados en el sistema.
+              </p>
+            </div>
+          </a>
+
+          <a
+            routerLink="/pilotos"
+            class="acceso"
+          >
+            <span class="acceso-numero">05</span>
+
+            <div>
+              <strong>Pilotos</strong>
+
+              <p>
+                Consulta y administra los pilotos disponibles.
+              </p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="actividad-unidades">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Actividad por unidad</h2>
+
+            <p>
+              Resultados acumulados de cada vehículo durante el día.
+            </p>
+          </div>
+
+          <a routerLink="/ingresos">
+            Ver reporte completo
+          </a>
+        </div>
+
+        @if (datos.porUnidad.length === 0) {
+          <div class="sin-registros">
+            Todavía no se han registrado operaciones durante el día.
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Unidad</th>
+                  <th>Placa</th>
+                  <th>Operaciones</th>
+                  <th>Kilómetros</th>
+                  <th>Liquidado</th>
+                  <th>Combustible</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (
+                  unidad of datos.porUnidad;
+                  track unidad.unidadId
+                ) {
+                  <tr>
+                    <td>
+                      <strong>
+                        {{ unidad.numeroUnidad }}
+                      </strong>
+                    </td>
+
+                    <td>{{ unidad.placa }}</td>
+
+                    <td>{{ unidad.operaciones }}</td>
+
+                    <td>
+                      {{ unidad.kilometrosRecorridos }} km
+                    </td>
+
+                    <td>
+                      Q {{ unidad.montoLiquidado.toFixed(2) }}
+                    </td>
+
+                    <td>
+                      Q {{ unidad.montoCombustible.toFixed(2) }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+  }
+</section>

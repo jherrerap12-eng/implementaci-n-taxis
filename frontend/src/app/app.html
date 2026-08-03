@@ -1,6 +1,6 @@
 <header class="barra-superior">
   <div class="barra-contenido">
-    <a class="marca" routerLink="/registro-diario">
+    <a class="marca" routerLink="/dashboard">
       <span class="marca-icono">TX</span>
 
       <div>
@@ -10,6 +10,10 @@
     </a>
 
     <nav class="navegacion">
+      <a routerLink="/dashboard" routerLinkActive="opcion-activa">
+        Inicio
+      </a>
+
       <a routerLink="/registro-diario" routerLinkActive="opcion-activa">
         Registro diario
       </a>
@@ -18,15 +22,16 @@
         Resumen diario
       </a>
 
+      <a routerLink="/ingresos" routerLinkActive="opcion-activa">
+        Ingresos
+      </a>
+
       <a routerLink="/pilotos" routerLinkActive="opcion-activa">
         Pilotos
       </a>
 
       <a routerLink="/unidades" routerLinkActive="opcion-activa">
         Unidades
-      </a>
-      <a routerLink="/ingresos" routerLinkActive="opcion-activa">
-        Ingresos
       </a>
     </nav>
   </div>
