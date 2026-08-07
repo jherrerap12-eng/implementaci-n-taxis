@@ -5,12 +5,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 
-import {
-  Piloto,
-  PilotosService,
-} from '../../services/pilotos';
+import { Piloto } from '../../services/pilotos';
 import {
   CrearRegistroDiarioRequest,
   RegistrarCombustibleRequest,
@@ -18,10 +15,7 @@ import {
   RegistrosDiariosService,
   ResultadoCombustible,
 } from '../../services/registros-diarios';
-import {
-  Unidad,
-  UnidadesService,
-} from '../../services/unidades';
+import { Unidad } from '../../services/unidades';
 
 @Component({
   selector: 'app-registro-diario',
@@ -31,8 +25,6 @@ import {
 })
 export class RegistroDiarioComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly pilotosService = inject(PilotosService);
-  private readonly unidadesService = inject(UnidadesService);
   private readonly registrosService = inject(RegistrosDiariosService);
   private readonly rutaActiva = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -114,18 +106,20 @@ export class RegistroDiarioComponent implements OnInit {
       ],
     });
 
-  ngOnInit(): void {
-    const registroId = Number(
-      this.rutaActiva.snapshot.queryParamMap.get('registroId'),
-    );
+ngOnInit(): void {
+  this.configurarCambioFecha();
 
-    if (Number.isInteger(registroId) && registroId > 0) {
-      this.cargarRegistroPendiente(registroId);
-      return;
-    }
+  const registroId = Number(
+    this.rutaActiva.snapshot.queryParamMap.get('registroId'),
+  );
 
-    this.cargarCatalogos();
+  if (Number.isInteger(registroId) && registroId > 0) {
+    this.cargarRegistroPendiente(registroId);
+    return;
   }
+
+  this.cargarDisponibilidad();
+}
 
   cargarRegistroPendiente(registroId: number): void {
     this.cargando.set(true);
@@ -137,7 +131,7 @@ export class RegistroDiarioComponent implements OnInit {
         const registro = respuesta.data;
 
         if (registro.estado !== 'PENDIENTE_COMBUSTIBLE') {
-          this.cargarCatalogos();
+          this.cargarDisponibilidad();
 
           this.mensajeError.set(
             'Esta operación ya fue completada y no tiene combustible pendiente',
@@ -167,7 +161,7 @@ export class RegistroDiarioComponent implements OnInit {
           error,
         );
 
-        this.cargarCatalogos();
+        this.cargarDisponibilidad();
 
         this.mensajeError.set(
           error.error?.message ||
@@ -177,43 +171,48 @@ export class RegistroDiarioComponent implements OnInit {
     });
   }
 
-  cargarCatalogos(): void {
-    this.cargando.set(true);
-    this.mensajeError.set('');
+cargarDisponibilidad(): void {
+  const fecha =
+    this.formularioRegistro.controls.fecha.value;
 
-    forkJoin({
-      pilotos: this.pilotosService.obtenerPilotos(),
-      unidades: this.unidadesService.obtenerUnidades(),
-    }).subscribe({
+  if (!fecha) {
+    this.pilotos.set([]);
+    this.unidades.set([]);
+    this.cargando.set(false);
+    return;
+  }
+
+  this.cargando.set(true);
+  this.mensajeError.set('');
+
+  this.registrosService
+    .obtenerDisponibilidad(fecha)
+    .subscribe({
       next: (respuesta) => {
-        this.pilotos.set(
-          respuesta.pilotos.data.filter(
-            (piloto) => piloto.estado === 'ACTIVO',
-          ),
-        );
-
-        this.unidades.set(
-          respuesta.unidades.data.filter(
-            (unidad) => unidad.estado === 'DISPONIBLE',
-          ),
-        );
+        this.pilotos.set(respuesta.data.pilotos);
+        this.unidades.set(respuesta.data.unidades);
 
         this.cargando.set(false);
       },
       error: (error) => {
         console.error(
-          'Error al cargar pilotos y unidades:',
+          'Error al cargar la disponibilidad:',
           error,
         );
 
+        this.pilotos.set([]);
+        this.unidades.set([]);
+        this.kilometrajeInicial.set(null);
+
         this.mensajeError.set(
-          'No fue posible cargar los pilotos y las unidades',
+          error.error?.message ||
+            'No fue posible cargar los pilotos y las unidades disponibles',
         );
 
         this.cargando.set(false);
       },
     });
-  }
+}
 
   seleccionarUnidad(): void {
     const unidadId =
@@ -452,14 +451,19 @@ export class RegistroDiarioComponent implements OnInit {
     this.mensajeError.set('');
     this.mensajeExito.set('');
 
-    this.formularioRegistro.reset({
-      pilotoId: 0,
-      unidadId: 0,
-      fecha: this.obtenerFechaActual(),
-      kilometrajeFinal: 0,
-      montoLiquidado: 0,
-      observaciones: '',
-    });
+this.formularioRegistro.reset(
+  {
+    pilotoId: 0,
+    unidadId: 0,
+    fecha: this.obtenerFechaActual(),
+    kilometrajeFinal: 0,
+    montoLiquidado: 0,
+    observaciones: '',
+  },
+  {
+    emitEvent: false,
+  },
+);
 
     this.formularioCombustible.reset({
       sinCombustible: false,
@@ -467,9 +471,30 @@ export class RegistroDiarioComponent implements OnInit {
       precioGalon: 0,
     });
 
-    this.cargarCatalogos();
+    this.cargarDisponibilidad();
   }
+  private configurarCambioFecha(): void {
+  this.formularioRegistro.controls.fecha.valueChanges
+    .pipe(distinctUntilChanged())
+    .subscribe(() => {
+      this.formularioRegistro.patchValue(
+        {
+          pilotoId: 0,
+          unidadId: 0,
+          kilometrajeFinal: 0,
+        },
+        {
+          emitEvent: false,
+        },
+      );
 
+      this.kilometrajeInicial.set(null);
+      this.mensajeError.set('');
+      this.mensajeExito.set('');
+
+      this.cargarDisponibilidad();
+    });
+}
   private obtenerFechaActual(): string {
     const fecha = new Date();
 

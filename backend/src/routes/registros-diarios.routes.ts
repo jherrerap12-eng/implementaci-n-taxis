@@ -22,6 +22,133 @@ export const registrosDiariosRouter = Router();
 
 // Obtiene el resumen de operaciones de una fecha.
 registrosDiariosRouter.get(
+  '/disponibilidad',
+  async (
+    req: Request<
+      Record<string, never>,
+      unknown,
+      unknown,
+      { fecha?: string }
+    >,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const fechaTexto = req.query.fecha?.trim();
+
+      if (!fechaTexto) {
+        res.status(400).json({
+          success: false,
+          message: 'La fecha es obligatoria',
+        });
+        return;
+      }
+
+      const fechaRegistro = new Date(
+        `${fechaTexto}T00:00:00.000Z`,
+      );
+
+      if (
+        Number.isNaN(fechaRegistro.getTime()) ||
+        fechaRegistro.toISOString().slice(0, 10) !==
+          fechaTexto
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'La fecha ingresada no es válida',
+        });
+        return;
+      }
+
+      const registrosDeLaFecha =
+        await prisma.registroDiario.findMany({
+          where: {
+            fecha: fechaRegistro,
+          },
+          select: {
+            pilotoId: true,
+            unidadId: true,
+          },
+        });
+
+      const pilotosOcupados = [
+        ...new Set(
+          registrosDeLaFecha.map(
+            (registro) => registro.pilotoId,
+          ),
+        ),
+      ];
+
+      const unidadesOcupadas = [
+        ...new Set(
+          registrosDeLaFecha.map(
+            (registro) => registro.unidadId,
+          ),
+        ),
+      ];
+
+      const [pilotosDisponibles, unidadesDisponibles] =
+        await Promise.all([
+          prisma.piloto.findMany({
+            where: {
+              estado: 'ACTIVO',
+
+              ...(pilotosOcupados.length > 0
+                ? {
+                    id: {
+                      notIn: pilotosOcupados,
+                    },
+                  }
+                : {}),
+            },
+            orderBy: {
+              codigo: 'asc',
+            },
+          }),
+
+          prisma.unidad.findMany({
+            where: {
+              estado: 'DISPONIBLE',
+
+              ...(unidadesOcupadas.length > 0
+                ? {
+                    id: {
+                      notIn: unidadesOcupadas,
+                    },
+                  }
+                : {}),
+            },
+            orderBy: {
+              numeroUnidad: 'asc',
+            },
+          }),
+        ]);
+
+      res.status(200).json({
+        success: true,
+        message:
+          'Disponibilidad obtenida correctamente',
+        data: {
+          fecha: fechaTexto,
+          pilotos: pilotosDisponibles,
+          unidades: unidadesDisponibles,
+        },
+      });
+    } catch (error) {
+      console.error(
+        'Error al consultar la disponibilidad:',
+        error,
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          'No fue posible consultar la disponibilidad',
+      });
+    }
+  },
+);
+
+registrosDiariosRouter.get(
   '/resumen',
   async (
     req: Request<Record<string, never>, unknown, unknown, { fecha?: string }>,
@@ -305,6 +432,55 @@ registrosDiariosRouter.post(
         });
         return;
       }
+      const [registroDelPiloto, registroDeLaUnidad] =
+  await Promise.all([
+    prisma.registroDiario.findFirst({
+      where: {
+        pilotoId: pilotoIdConvertido,
+        fecha: fechaRegistro,
+      },
+      select: {
+        id: true,
+      },
+    }),
+
+    prisma.registroDiario.findFirst({
+      where: {
+        unidadId: unidadIdConvertido,
+        fecha: fechaRegistro,
+      },
+      select: {
+        id: true,
+      },
+    }),
+  ]);
+
+if (registroDelPiloto && registroDeLaUnidad) {
+  res.status(409).json({
+    success: false,
+    message:
+      'El piloto y la unidad ya tienen una operación registrada en esta fecha',
+  });
+  return;
+}
+
+if (registroDelPiloto) {
+  res.status(409).json({
+    success: false,
+    message:
+      'El piloto seleccionado ya tiene una operación registrada en esta fecha',
+  });
+  return;
+}
+
+if (registroDeLaUnidad) {
+  res.status(409).json({
+    success: false,
+    message:
+      'La unidad seleccionada ya tiene una operación registrada en esta fecha',
+  });
+  return;
+}
 
       const kilometrajeInicial = unidad.kilometrajeActual;
 

@@ -11,7 +11,7 @@
     <button
       type="button"
       class="boton-secundario"
-      (click)="cargarCatalogos()"
+      (click)="cargarDisponibilidad()"
       [disabled]="cargando() || guardando() || guardandoCombustible()"
     >
       {{ cargando() ? 'Actualizando...' : 'Actualizar información' }}

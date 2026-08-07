@@ -66,6 +66,12 @@ export interface ResumenDiario {
   registros: RegistroDiario[];
 }
 
+export interface DisponibilidadDiaria {
+  fecha: string;
+  pilotos: Piloto[];
+  unidades: Unidad[];
+}
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -99,20 +105,34 @@ export class RegistrosDiariosService {
       datos,
     );
   }
+
   obtenerResumen(
     fecha: string,
   ): Observable<ApiResponse<ResumenDiario>> {
     return this.http.get<ApiResponse<ResumenDiario>>(
       `${this.apiUrl}/resumen`,
       {
-        params:
-        {
+        params: {
           fecha,
         },
       },
     );
   }
-    obtenerPorId(
+
+  obtenerDisponibilidad(
+    fecha: string,
+  ): Observable<ApiResponse<DisponibilidadDiaria>> {
+    return this.http.get<ApiResponse<DisponibilidadDiaria>>(
+      `${this.apiUrl}/disponibilidad`,
+      {
+        params: {
+          fecha,
+        },
+      },
+    );
+  }
+
+  obtenerPorId(
     registroId: number,
   ): Observable<ApiResponse<RegistroDiario>> {
     return this.http.get<ApiResponse<RegistroDiario>>(
