@@ -82,6 +82,8 @@ model RegistroDiario {
   unidad            Unidad             @relation(fields: [unidadId], references: [id])
   cargasCombustible CargaCombustible[]
 
+  @@unique([pilotoId, fecha], map: "uq_registros_diarios_piloto_fecha")
+  @@unique([unidadId, fecha], map: "uq_registros_diarios_unidad_fecha")
   @@index([fecha])
   @@index([pilotoId])
   @@index([unidadId])
