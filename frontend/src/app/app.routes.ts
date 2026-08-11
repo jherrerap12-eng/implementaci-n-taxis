@@ -6,8 +6,10 @@ import { RegistroDiarioComponent } from './pages/registro-diario/registro-diario
 import { ResumenDiarioComponent } from './pages/resumen-diario/resumen-diario';
 import { Unidades } from './pages/unidades/unidades';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Mantenimientos } from './pages/mantenimientos/mantenimientos';
 
 export const routes: Routes = [
+
     {
         path: 'dashboard',
         component: Dashboard,
@@ -42,6 +44,11 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
+    },
+    {
+    path: 'mantenimientos',
+    component: Mantenimientos,
+    title: 'Mantenimientos | Sistema de flotilla',
     },
     {
         path: '**',

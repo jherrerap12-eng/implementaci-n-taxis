@@ -1,0 +1,258 @@
+<section class="pagina-mantenimientos">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Control de unidades</span>
+
+      <h1>Mantenimientos</h1>
+
+      <p>
+        Registra servicios, reparaciones y controla qué unidades
+        se encuentran fuera de operación.
+      </p>
+    </div>
+  </header>
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  @if (mensajeExito()) {
+    <div class="mensaje-exito">
+      {{ mensajeExito() }}
+    </div>
+  }
+
+  <section class="panel-registro">
+    <div class="titulo-panel">
+      <div>
+        <h2>Nuevo mantenimiento</h2>
+
+        <p>
+          La unidad seleccionada cambiará automáticamente
+          a estado MANTENIMIENTO.
+        </p>
+      </div>
+    </div>
+
+    <form
+      class="formulario"
+      [formGroup]="formularioMantenimiento"
+      (ngSubmit)="registrarMantenimiento()"
+    >
+      <div class="campo">
+        <label for="unidadMantenimiento">
+          Unidad
+        </label>
+
+        <select
+          id="unidadMantenimiento"
+          formControlName="unidadId"
+        >
+          <option [ngValue]="0">
+            Selecciona una unidad
+          </option>
+
+          @for (unidad of unidades(); track unidad.id) {
+            <option [ngValue]="unidad.id">
+              {{ unidad.numeroUnidad }} -
+              {{ unidad.placa }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="fechaInicio">
+          Fecha de inicio
+        </label>
+
+        <input
+          id="fechaInicio"
+          type="date"
+          formControlName="fechaInicio"
+        />
+      </div>
+
+      <div class="campo campo-completo">
+        <label for="descripcion">
+          Descripción
+        </label>
+
+        <textarea
+          id="descripcion"
+          rows="4"
+          formControlName="descripcion"
+          placeholder="Ej. Cambio de aceite, revisión de frenos..."
+        ></textarea>
+      </div>
+
+      <div class="campo">
+        <label for="costo">
+          Costo
+        </label>
+
+        <input
+          id="costo"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="costo"
+        />
+      </div>
+
+      <div class="acciones-formulario">
+        <button
+          type="submit"
+          class="boton-principal"
+          [disabled]="guardando()"
+        >
+          {{
+            guardando()
+              ? 'Registrando...'
+              : 'Registrar mantenimiento'
+          }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel-historial">
+    <div class="titulo-panel">
+      <div>
+        <h2>Historial de mantenimientos</h2>
+
+        <p>
+          Consulta mantenimientos activos y finalizados.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="boton-recargar"
+        (click)="cargarDatos()"
+        [disabled]="cargando()"
+      >
+        Actualizar
+      </button>
+    </div>
+
+    @if (cargando()) {
+      <div class="estado-carga">
+        Cargando información...
+      </div>
+    } @else {
+      @if (mantenimientos().length === 0) {
+        <div class="sin-registros">
+          No hay mantenimientos registrados.
+        </div>
+      } @else {
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Unidad</th>
+                <th>Fecha inicio</th>
+                <th>Fecha fin</th>
+                <th>Kilometraje</th>
+                <th>Descripción</th>
+                <th>Costo</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                mantenimiento of mantenimientos();
+                track mantenimiento.id
+              ) {
+                <tr>
+                  <td>
+                    <strong>
+                      {{ mantenimiento.unidad.numeroUnidad }}
+                    </strong>
+
+                    <small>
+                      {{ mantenimiento.unidad.placa }}
+                    </small>
+                  </td>
+
+                  <td>
+                    {{ mantenimiento.fechaInicio.slice(0, 10) }}
+                  </td>
+
+                  <td>
+                    {{
+                      mantenimiento.fechaFin
+                        ? mantenimiento.fechaFin.slice(0, 10)
+                        : '-'
+                    }}
+                  </td>
+
+                  <td>
+                    {{ mantenimiento.kilometraje }} km
+                  </td>
+
+                  <td class="descripcion-tabla">
+                    {{ mantenimiento.descripcion }}
+                  </td>
+
+                  <td>
+                Q {{ formatearCosto(mantenimiento.costo) }}
+                  </td>
+
+                  <td>
+                    <span
+                      class="estado"
+                      [class.estado-activo]="
+                        mantenimiento.estado === 'EN_PROCESO'
+                      "
+                      [class.estado-finalizado]="
+                        mantenimiento.estado === 'FINALIZADO'
+                      "
+                    >
+                      {{
+                        mantenimiento.estado === 'EN_PROCESO'
+                          ? 'En proceso'
+                          : 'Finalizado'
+                      }}
+                    </span>
+                  </td>
+
+                  <td>
+                    @if (
+                      mantenimiento.estado === 'EN_PROCESO'
+                    ) {
+                      <button
+                        type="button"
+                        class="boton-finalizar"
+                        (click)="
+                          finalizarMantenimiento(mantenimiento)
+                        "
+                        [disabled]="
+                          finalizandoId() === mantenimiento.id
+                        "
+                      >
+                        {{
+                          finalizandoId() === mantenimiento.id
+                            ? 'Finalizando...'
+                            : 'Finalizar'
+                        }}
+                      </button>
+                    } @else {
+                      <span class="accion-finalizada">
+                        Completado
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </section>
+</section>
