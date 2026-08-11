@@ -20,7 +20,7 @@ interface RegistrarCombustibleBody {
 
 export const registrosDiariosRouter = Router();
 
-// Obtiene el resumen de operaciones de una fecha.
+// Obtiene los pilotos y unidades disponibles para una fecha.
 registrosDiariosRouter.get(
   '/disponibilidad',
   async (
@@ -91,6 +91,10 @@ registrosDiariosRouter.get(
           prisma.piloto.findMany({
             where: {
               estado: 'ACTIVO',
+
+              vencimientoLicencia: {
+                gte: fechaRegistro,
+              },
 
               ...(pilotosOcupados.length > 0
                 ? {
@@ -424,6 +428,14 @@ registrosDiariosRouter.post(
         });
         return;
       }
+      if (piloto.vencimientoLicencia < fechaRegistro) {
+  res.status(400).json({
+    success: false,
+    message:
+      'El piloto seleccionado tiene la licencia vencida para esta fecha',
+  });
+  return;
+}
 
       if (unidad.estado !== 'DISPONIBLE') {
         res.status(400).json({
@@ -713,11 +725,11 @@ registrosDiariosRouter.post(
         error,
       );
 
-      res.status(500).json({
-        success: false,
-        message:
-          'No fue posible registrar el combustible',
-      });
-    }
-  },
+     res.status(500).json({
+      success: false,
+      message:
+        'No fue posible registrar el combustible',
+    });
+  }
+},
 );
