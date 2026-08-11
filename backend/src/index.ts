@@ -7,6 +7,7 @@ import { pilotosRouter } from './routes/pilotos.routes.js';
 import { unidadesRouter } from './routes/unidades.routes.js';
 import { registrosDiariosRouter } from './routes/registros-diarios.routes.js';
 import { ingresosRouter } from './routes/ingresos.routes.js';
+import { mantenimientosRouter } from './routes/mantenimientos.routes.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/pilotos', pilotosRouter);
 app.use('/api/unidades', unidadesRouter);
 app.use('/api/registros-diarios', registrosDiariosRouter);
 app.use('/api/ingresos', ingresosRouter);
+app.use('/api/mantenimientos', mantenimientosRouter);
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({

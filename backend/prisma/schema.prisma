@@ -56,6 +56,7 @@ model Unidad {
   actualizadoEn     DateTime        @updatedAt @map("actualizado_en")
 
   registrosDiarios RegistroDiario[]
+  mantenimientos   Mantenimiento[]
 
   @@map("unidades")
 }
@@ -102,4 +103,28 @@ model CargaCombustible {
 
   @@index([registroDiarioId])
   @@map("cargas_combustible")
+}
+
+enum EstadoMantenimiento {
+  EN_PROCESO
+  FINALIZADO
+}
+
+model Mantenimiento {
+  id            Int                 @id @default(autoincrement())
+  unidadId      Int                 @map("unidad_id")
+  fechaInicio   DateTime            @map("fecha_inicio") @db.Date
+  fechaFin      DateTime?           @map("fecha_fin") @db.Date
+  kilometraje   Int
+  descripcion   String
+  costo         Decimal             @db.Decimal(12, 2)
+  estado        EstadoMantenimiento @default(EN_PROCESO)
+  creadoEn      DateTime            @default(now()) @map("creado_en")
+  actualizadoEn DateTime            @updatedAt @map("actualizado_en")
+
+  unidad Unidad @relation(fields: [unidadId], references: [id])
+
+  @@index([unidadId])
+  @@index([estado])
+  @@map("mantenimientos")
 }
