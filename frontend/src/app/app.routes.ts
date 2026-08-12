@@ -46,9 +46,9 @@ export const routes: Routes = [
         pathMatch: 'full',
     },
     {
-    path: 'mantenimientos',
-    component: Mantenimientos,
-    title: 'Mantenimientos | Sistema de flotilla',
+        path: 'mantenimientos',
+        component: Mantenimientos,
+        title: 'Mantenimientos | Sistema de flotilla',
     },
     {
         path: '**',

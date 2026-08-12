@@ -24,6 +24,19 @@ export interface CrearPilotoRequest {
   observaciones?: string;
 }
 
+export interface ActualizarPilotoRequest {
+  codigo?: string;
+  nombreCompleto?: string;
+  telefono?: string;
+  numeroLicencia?: string;
+  vencimientoLicencia?: string;
+  observaciones?: string;
+}
+
+export interface CambiarEstadoPilotoRequest {
+  estado: 'ACTIVO' | 'INACTIVO';
+}
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -35,15 +48,46 @@ interface ApiResponse<T> {
 })
 export class PilotosService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/pilotos';
+
+  private readonly apiUrl =
+    'http://localhost:3000/api/pilotos';
 
   obtenerPilotos(): Observable<ApiResponse<Piloto[]>> {
-    return this.http.get<ApiResponse<Piloto[]>>(this.apiUrl);
+    return this.http.get<ApiResponse<Piloto[]>>(
+      this.apiUrl,
+    );
   }
 
   registrarPiloto(
     datos: CrearPilotoRequest,
   ): Observable<ApiResponse<Piloto>> {
-    return this.http.post<ApiResponse<Piloto>>(this.apiUrl, datos);
+    return this.http.post<ApiResponse<Piloto>>(
+      this.apiUrl,
+      datos,
+    );
+  }
+
+  actualizarPiloto(
+    pilotoId: number,
+    datos: ActualizarPilotoRequest,
+  ): Observable<ApiResponse<Piloto>> {
+    return this.http.patch<ApiResponse<Piloto>>(
+      `${this.apiUrl}/${pilotoId}`,
+      datos,
+    );
+  }
+
+  cambiarEstado(
+    pilotoId: number,
+    estado: 'ACTIVO' | 'INACTIVO',
+  ): Observable<ApiResponse<Piloto>> {
+    const datos: CambiarEstadoPilotoRequest = {
+      estado,
+    };
+
+    return this.http.patch<ApiResponse<Piloto>>(
+      `${this.apiUrl}/${pilotoId}/estado`,
+      datos,
+    );
   }
 }

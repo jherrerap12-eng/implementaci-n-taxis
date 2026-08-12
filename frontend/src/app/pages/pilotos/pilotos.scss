@@ -158,6 +158,7 @@ tbody tr:last-child td {
     font-size: 26px;
   }
 }
+
 .acciones-encabezado {
   display: flex;
   gap: 12px;
@@ -329,5 +330,54 @@ tbody tr:last-child td {
 
   .acciones-formulario button {
     width: 100%;
+  }
+
+  .acciones-tabla {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .boton-editar,
+  .boton-estado {
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .boton-editar {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .boton-editar:hover {
+    background: #bfdbfe;
+  }
+
+  .boton-activar {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .boton-activar:hover {
+    background: #bbf7d0;
+  }
+
+  .boton-inactivar {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .boton-inactivar:hover {
+    background: #fecaca;
+  }
+
+  .boton-editar:disabled,
+  .boton-estado:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }

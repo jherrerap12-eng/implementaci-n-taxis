@@ -3,7 +3,7 @@
     <div>
       <span class="seccion">Administración</span>
       <h1>Gestión de pilotos</h1>
-      <p>Consulta y registra los pilotos de la flotilla.</p>
+      <p>Consulta, registra y administra los pilotos de la flotilla.</p>
     </div>
 
     <div class="acciones-encabezado">
@@ -42,8 +42,21 @@
     <div class="formulario-contenedor">
       <div class="formulario-encabezado">
         <div>
-          <h2>Registrar nuevo piloto</h2>
-          <p>Completa los datos obligatorios del piloto.</p>
+          <h2>
+            {{
+              estaEditando()
+                ? 'Editar piloto'
+                : 'Registrar nuevo piloto'
+            }}
+          </h2>
+
+          <p>
+            {{
+              estaEditando()
+                ? 'Modifica la información necesaria del piloto.'
+                : 'Completa los datos obligatorios del piloto.'
+            }}
+          </p>
         </div>
 
         <button
@@ -57,11 +70,12 @@
 
       <form
         [formGroup]="formularioPiloto"
-        (ngSubmit)="registrarPiloto()"
+        (ngSubmit)="guardarPiloto()"
       >
         <div class="campos">
           <div class="campo">
             <label for="codigo">Código *</label>
+
             <input
               id="codigo"
               type="text"
@@ -78,7 +92,10 @@
           </div>
 
           <div class="campo">
-            <label for="nombreCompleto">Nombre completo *</label>
+            <label for="nombreCompleto">
+              Nombre completo *
+            </label>
+
             <input
               id="nombreCompleto"
               type="text"
@@ -96,6 +113,7 @@
 
           <div class="campo">
             <label for="telefono">Teléfono</label>
+
             <input
               id="telefono"
               type="text"
@@ -105,7 +123,10 @@
           </div>
 
           <div class="campo">
-            <label for="numeroLicencia">Número de licencia *</label>
+            <label for="numeroLicencia">
+              Número de licencia *
+            </label>
+
             <input
               id="numeroLicencia"
               type="text"
@@ -117,7 +138,9 @@
               formularioPiloto.controls.numeroLicencia.touched &&
               formularioPiloto.controls.numeroLicencia.invalid
             ) {
-              <small>El número de licencia es obligatorio.</small>
+              <small>
+                El número de licencia es obligatorio.
+              </small>
             }
           </div>
 
@@ -136,12 +159,17 @@
               formularioPiloto.controls.vencimientoLicencia.touched &&
               formularioPiloto.controls.vencimientoLicencia.invalid
             ) {
-              <small>La fecha de vencimiento es obligatoria.</small>
+              <small>
+                La fecha de vencimiento es obligatoria.
+              </small>
             }
           </div>
 
           <div class="campo campo-completo">
-            <label for="observaciones">Observaciones</label>
+            <label for="observaciones">
+              Observaciones
+            </label>
+
             <textarea
               id="observaciones"
               rows="3"
@@ -166,7 +194,15 @@
             class="boton-principal"
             [disabled]="guardando()"
           >
-            {{ guardando() ? 'Guardando...' : 'Guardar piloto' }}
+            @if (guardando()) {
+              Guardando...
+            } @else {
+              {{
+                estaEditando()
+                  ? 'Guardar cambios'
+                  : 'Guardar piloto'
+              }}
+            }
           </button>
         </div>
       </form>
@@ -188,6 +224,7 @@
             <th>Licencia</th>
             <th>Vencimiento</th>
             <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
@@ -199,22 +236,73 @@
               </td>
 
               <td>{{ piloto.nombreCompleto }}</td>
-              <td>{{ piloto.telefono || 'No registrado' }}</td>
+
+              <td>
+                {{ piloto.telefono || 'No registrado' }}
+              </td>
+
               <td>{{ piloto.numeroLicencia }}</td>
-              <td>{{ piloto.vencimientoLicencia.slice(0, 10) }}</td>
+
+              <td>
+                {{ piloto.vencimientoLicencia.slice(0, 10) }}
+              </td>
 
               <td>
                 <span
                   class="estado"
-                  [class.estado-inactivo]="piloto.estado === 'INACTIVO'"
+                  [class.estado-inactivo]="
+                    piloto.estado === 'INACTIVO'
+                  "
                 >
                   {{ piloto.estado }}
                 </span>
               </td>
+
+              <td>
+                <div class="acciones-tabla">
+                  <button
+                    type="button"
+                    class="boton-editar"
+                    (click)="editarPiloto(piloto)"
+                    [disabled]="
+                      cambiandoEstadoId() === piloto.id
+                    "
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    class="boton-estado"
+                    [class.boton-activar]="
+                      piloto.estado === 'INACTIVO'
+                    "
+                    [class.boton-inactivar]="
+                      piloto.estado === 'ACTIVO'
+                    "
+                    (click)="cambiarEstado(piloto)"
+                    [disabled]="
+                      cambiandoEstadoId() === piloto.id
+                    "
+                  >
+                    @if (
+                      cambiandoEstadoId() === piloto.id
+                    ) {
+                      Procesando...
+                    } @else {
+                      {{
+                        piloto.estado === 'ACTIVO'
+                          ? 'Inactivar'
+                          : 'Activar'
+                      }}
+                    }
+                  </button>
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="6" class="sin-registros">
+              <td colspan="7" class="sin-registros">
                 No hay pilotos registrados.
               </td>
             </tr>

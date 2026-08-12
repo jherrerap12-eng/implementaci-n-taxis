@@ -12,12 +12,28 @@ interface CrearPilotoBody {
   observaciones?: string;
 }
 
+interface ActualizarPilotoBody {
+  codigo?: string;
+  nombreCompleto?: string;
+  telefono?: string;
+  numeroLicencia?: string;
+  vencimientoLicencia?: string;
+  observaciones?: string;
+}
+
+interface CambiarEstadoPilotoBody {
+  estado?: 'ACTIVO' | 'INACTIVO';
+}
+
 export const pilotosRouter = Router();
 
 // Obtiene todos los pilotos registrados.
 pilotosRouter.get(
   '/',
-  async (_req: Request, res: Response): Promise<void> => {
+  async (
+    _req: Request,
+    res: Response,
+  ): Promise<void> => {
     try {
       const pilotos = await prisma.piloto.findMany({
         orderBy: {
@@ -31,11 +47,15 @@ pilotosRouter.get(
         data: pilotos,
       });
     } catch (error) {
-      console.error('Error al consultar pilotos:', error);
+      console.error(
+        'Error al consultar pilotos:',
+        error,
+      );
 
       res.status(500).json({
         success: false,
-        message: 'No fue posible consultar los pilotos',
+        message:
+          'No fue posible consultar los pilotos',
       });
     }
   },
@@ -45,7 +65,11 @@ pilotosRouter.get(
 pilotosRouter.post(
   '/',
   async (
-    req: Request<Record<string, never>, unknown, CrearPilotoBody>,
+    req: Request<
+      Record<string, never>,
+      unknown,
+      CrearPilotoBody
+    >,
     res: Response,
   ): Promise<void> => {
     try {
@@ -58,7 +82,6 @@ pilotosRouter.post(
         observaciones,
       } = req.body;
 
-      // Verifica los campos obligatorios.
       if (
         !codigo?.trim() ||
         !nombreCompleto?.trim() ||
@@ -77,10 +100,16 @@ pilotosRouter.post(
         `${vencimientoLicencia}T00:00:00.000Z`,
       );
 
-      if (Number.isNaN(fechaVencimiento.getTime())) {
+      if (
+        Number.isNaN(fechaVencimiento.getTime()) ||
+        fechaVencimiento
+          .toISOString()
+          .slice(0, 10) !== vencimientoLicencia
+      ) {
         res.status(400).json({
           success: false,
-          message: 'La fecha de vencimiento no es válida',
+          message:
+            'La fecha de vencimiento no es válida',
         });
         return;
       }
@@ -90,9 +119,11 @@ pilotosRouter.post(
           codigo: codigo.trim().toUpperCase(),
           nombreCompleto: nombreCompleto.trim(),
           telefono: telefono?.trim() || null,
-          numeroLicencia: numeroLicencia.trim().toUpperCase(),
+          numeroLicencia:
+            numeroLicencia.trim().toUpperCase(),
           vencimientoLicencia: fechaVencimiento,
-          observaciones: observaciones?.trim() || null,
+          observaciones:
+            observaciones?.trim() || null,
         },
       });
 
@@ -102,9 +133,9 @@ pilotosRouter.post(
         data: piloto,
       });
     } catch (error) {
-      // El código y la licencia están configurados como únicos.
       if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error instanceof
+        Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         res.status(409).json({
@@ -115,11 +146,297 @@ pilotosRouter.post(
         return;
       }
 
-      console.error('Error al registrar piloto:', error);
+      console.error(
+        'Error al registrar piloto:',
+        error,
+      );
 
       res.status(500).json({
         success: false,
-        message: 'No fue posible registrar el piloto',
+        message:
+          'No fue posible registrar el piloto',
+      });
+    }
+  },
+);
+
+// Edita la información de un piloto.
+pilotosRouter.patch(
+  '/:id',
+  async (
+    req: Request<
+      { id: string },
+      unknown,
+      ActualizarPilotoBody
+    >,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const pilotoId = Number(req.params.id);
+
+      if (
+        !Number.isInteger(pilotoId) ||
+        pilotoId <= 0
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El identificador del piloto no es válido',
+        });
+        return;
+      }
+
+      const pilotoExistente =
+        await prisma.piloto.findUnique({
+          where: {
+            id: pilotoId,
+          },
+        });
+
+      if (!pilotoExistente) {
+        res.status(404).json({
+          success: false,
+          message: 'El piloto no existe',
+        });
+        return;
+      }
+
+      const {
+        codigo,
+        nombreCompleto,
+        telefono,
+        numeroLicencia,
+        vencimientoLicencia,
+        observaciones,
+      } = req.body;
+
+      if (
+        codigo !== undefined &&
+        !codigo.trim()
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'El código no puede estar vacío',
+        });
+        return;
+      }
+
+      if (
+        nombreCompleto !== undefined &&
+        !nombreCompleto.trim()
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El nombre no puede estar vacío',
+        });
+        return;
+      }
+
+      if (
+        numeroLicencia !== undefined &&
+        !numeroLicencia.trim()
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El número de licencia no puede estar vacío',
+        });
+        return;
+      }
+
+      let fechaVencimiento:
+        | Date
+        | undefined;
+
+      if (vencimientoLicencia !== undefined) {
+        fechaVencimiento = new Date(
+          `${vencimientoLicencia}T00:00:00.000Z`,
+        );
+
+        if (
+          Number.isNaN(fechaVencimiento.getTime()) ||
+          fechaVencimiento
+            .toISOString()
+            .slice(0, 10) !== vencimientoLicencia
+        ) {
+          res.status(400).json({
+            success: false,
+            message:
+              'La fecha de vencimiento no es válida',
+          });
+          return;
+        }
+      }
+
+      const pilotoActualizado =
+        await prisma.piloto.update({
+          where: {
+            id: pilotoId,
+          },
+          data: {
+            ...(codigo !== undefined
+              ? {
+                codigo:
+                  codigo.trim().toUpperCase(),
+              }
+              : {}),
+
+            ...(nombreCompleto !== undefined
+              ? {
+                nombreCompleto:
+                  nombreCompleto.trim(),
+              }
+              : {}),
+
+            ...(telefono !== undefined
+              ? {
+                telefono:
+                  telefono.trim() || null,
+              }
+              : {}),
+
+            ...(numeroLicencia !== undefined
+              ? {
+                numeroLicencia:
+                  numeroLicencia
+                    .trim()
+                    .toUpperCase(),
+              }
+              : {}),
+
+            ...(fechaVencimiento !== undefined
+              ? {
+                vencimientoLicencia:
+                  fechaVencimiento,
+              }
+              : {}),
+
+            ...(observaciones !== undefined
+              ? {
+                observaciones:
+                  observaciones.trim() || null,
+              }
+              : {}),
+          },
+        });
+
+      res.status(200).json({
+        success: true,
+        message:
+          'Piloto actualizado correctamente',
+        data: pilotoActualizado,
+      });
+    } catch (error) {
+      if (
+        error instanceof
+        Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        res.status(409).json({
+          success: false,
+          message:
+            'Ya existe otro piloto con ese código o número de licencia',
+        });
+        return;
+      }
+
+      console.error(
+        'Error al actualizar piloto:',
+        error,
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          'No fue posible actualizar el piloto',
+      });
+    }
+  },
+);
+
+// Activa o inactiva administrativamente a un piloto.
+pilotosRouter.patch(
+  '/:id/estado',
+  async (
+    req: Request<
+      { id: string },
+      unknown,
+      CambiarEstadoPilotoBody
+    >,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const pilotoId = Number(req.params.id);
+      const { estado } = req.body;
+
+      if (
+        !Number.isInteger(pilotoId) ||
+        pilotoId <= 0
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El identificador del piloto no es válido',
+        });
+        return;
+      }
+
+      if (
+        estado !== 'ACTIVO' &&
+        estado !== 'INACTIVO'
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El estado del piloto no es válido',
+        });
+        return;
+      }
+
+      const pilotoExistente =
+        await prisma.piloto.findUnique({
+          where: {
+            id: pilotoId,
+          },
+        });
+
+      if (!pilotoExistente) {
+        res.status(404).json({
+          success: false,
+          message: 'El piloto no existe',
+        });
+        return;
+      }
+
+      const pilotoActualizado =
+        await prisma.piloto.update({
+          where: {
+            id: pilotoId,
+          },
+          data: {
+            estado,
+          },
+        });
+
+      res.status(200).json({
+        success: true,
+        message:
+          estado === 'ACTIVO'
+            ? 'Piloto activado correctamente'
+            : 'Piloto inactivado correctamente',
+        data: pilotoActualizado,
+      });
+    } catch (error) {
+      console.error(
+        'Error al cambiar el estado del piloto:',
+        error,
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          'No fue posible cambiar el estado del piloto',
       });
     }
   },
