@@ -304,4 +304,58 @@ tbody tr:last-child td {
   h1 {
     font-size: 26px;
   }
+
+  .acciones-tabla {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .boton-editar {
+    border: 0;
+    border-radius: 7px;
+    padding: 8px 11px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .boton-editar:hover {
+    background: #bfdbfe;
+  }
+
+  .boton-editar:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .selector-estado {
+    min-width: 145px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 7px 9px;
+    background: #ffffff;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .selector-estado:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  .selector-estado:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    background: #f3f4f6;
+  }
+
+  .procesando-estado {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+  }
 }

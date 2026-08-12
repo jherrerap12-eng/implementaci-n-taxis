@@ -3,7 +3,10 @@
     <div>
       <span class="seccion">Administración</span>
       <h1>Gestión de unidades</h1>
-      <p>Consulta y registra los vehículos que forman parte de la flotilla.</p>
+      <p>
+        Consulta, registra y administra los vehículos que forman parte de la
+        flotilla.
+      </p>
     </div>
 
     <div class="acciones-encabezado">
@@ -42,8 +45,21 @@
     <div class="formulario-contenedor">
       <div class="formulario-encabezado">
         <div>
-          <h2>Registrar nueva unidad</h2>
-          <p>Completa la información del vehículo.</p>
+          <h2>
+            {{
+              estaEditando()
+                ? 'Editar unidad'
+                : 'Registrar nueva unidad'
+            }}
+          </h2>
+
+          <p>
+            {{
+              estaEditando()
+                ? 'Modifica la información administrativa de la unidad.'
+                : 'Completa la información del vehículo.'
+            }}
+          </p>
         </div>
 
         <button
@@ -57,11 +73,13 @@
 
       <form
         [formGroup]="formularioUnidad"
-        (ngSubmit)="registrarUnidad()"
+        (ngSubmit)="guardarUnidad()"
       >
         <div class="campos">
           <div class="campo">
-            <label for="numeroUnidad">Número de unidad *</label>
+            <label for="numeroUnidad">
+              Número de unidad *
+            </label>
 
             <input
               id="numeroUnidad"
@@ -74,12 +92,16 @@
               formularioUnidad.controls.numeroUnidad.touched &&
               formularioUnidad.controls.numeroUnidad.invalid
             ) {
-              <small>El número de unidad es obligatorio.</small>
+              <small>
+                El número de unidad es obligatorio.
+              </small>
             }
           </div>
 
           <div class="campo">
-            <label for="placa">Placa *</label>
+            <label for="placa">
+              Placa *
+            </label>
 
             <input
               id="placa"
@@ -92,12 +114,16 @@
               formularioUnidad.controls.placa.touched &&
               formularioUnidad.controls.placa.invalid
             ) {
-              <small>La placa es obligatoria.</small>
+              <small>
+                La placa es obligatoria.
+              </small>
             }
           </div>
 
           <div class="campo">
-            <label for="marca">Marca *</label>
+            <label for="marca">
+              Marca *
+            </label>
 
             <input
               id="marca"
@@ -110,12 +136,16 @@
               formularioUnidad.controls.marca.touched &&
               formularioUnidad.controls.marca.invalid
             ) {
-              <small>La marca es obligatoria.</small>
+              <small>
+                La marca es obligatoria.
+              </small>
             }
           </div>
 
           <div class="campo">
-            <label for="modelo">Modelo *</label>
+            <label for="modelo">
+              Modelo *
+            </label>
 
             <input
               id="modelo"
@@ -128,12 +158,16 @@
               formularioUnidad.controls.modelo.touched &&
               formularioUnidad.controls.modelo.invalid
             ) {
-              <small>El modelo es obligatorio.</small>
+              <small>
+                El modelo es obligatorio.
+              </small>
             }
           </div>
 
           <div class="campo">
-            <label for="anio">Año *</label>
+            <label for="anio">
+              Año *
+            </label>
 
             <input
               id="anio"
@@ -146,19 +180,28 @@
               formularioUnidad.controls.anio.touched &&
               formularioUnidad.controls.anio.invalid
             ) {
-              <small>Ingresa un año válido.</small>
+              <small>
+                Ingresa un año válido.
+              </small>
             }
           </div>
 
           <div class="campo">
-            <label for="tipoCombustible">Tipo de combustible *</label>
+            <label for="tipoCombustible">
+              Tipo de combustible *
+            </label>
 
             <select
               id="tipoCombustible"
               formControlName="tipoCombustible"
             >
-              <option value="GASOLINA">Gasolina</option>
-              <option value="DIESEL">Diésel</option>
+              <option value="GASOLINA">
+                Gasolina
+              </option>
+
+              <option value="DIESEL">
+                Diésel
+              </option>
             </select>
           </div>
 
@@ -173,18 +216,28 @@
               formControlName="kilometrajeActual"
               min="0"
               placeholder="Ejemplo: 45000"
+              [readonly]="estaEditando()"
             />
 
-            @if (
+            @if (estaEditando()) {
+              <small>
+                El kilometraje se actualiza automáticamente desde el Registro
+                diario.
+              </small>
+            } @else if (
               formularioUnidad.controls.kilometrajeActual.touched &&
               formularioUnidad.controls.kilometrajeActual.invalid
             ) {
-              <small>El kilometraje debe ser mayor o igual a cero.</small>
+              <small>
+                El kilometraje debe ser mayor o igual a cero.
+              </small>
             }
           </div>
 
           <div class="campo campo-completo">
-            <label for="observaciones">Observaciones</label>
+            <label for="observaciones">
+              Observaciones
+            </label>
 
             <textarea
               id="observaciones"
@@ -210,7 +263,15 @@
             class="boton-principal"
             [disabled]="guardando()"
           >
-            {{ guardando() ? 'Guardando...' : 'Guardar unidad' }}
+            @if (guardando()) {
+              Guardando...
+            } @else {
+              {{
+                estaEditando()
+                  ? 'Guardar cambios'
+                  : 'Guardar unidad'
+              }}
+            }
           </button>
         </div>
       </form>
@@ -233,6 +294,7 @@
             <th>Combustible</th>
             <th>Kilometraje</th>
             <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
@@ -240,19 +302,30 @@
           @for (unidad of unidades(); track unidad.id) {
             <tr>
               <td>
-                <strong>{{ unidad.numeroUnidad }}</strong>
+                <strong>
+                  {{ unidad.numeroUnidad }}
+                </strong>
               </td>
 
-              <td>{{ unidad.placa }}</td>
-
               <td>
-                {{ unidad.marca }} {{ unidad.modelo }}
+                {{ unidad.placa }}
               </td>
 
-              <td>{{ unidad.anio }}</td>
+              <td>
+                {{ unidad.marca }}
+                {{ unidad.modelo }}
+              </td>
 
               <td>
-                {{ unidad.tipoCombustible === 'DIESEL' ? 'Diésel' : 'Gasolina' }}
+                {{ unidad.anio }}
+              </td>
+
+              <td>
+                {{
+                  unidad.tipoCombustible === 'DIESEL'
+                    ? 'Diésel'
+                    : 'Gasolina'
+                }}
               </td>
 
               <td>
@@ -269,10 +342,70 @@
                   {{ unidad.estado.replaceAll('_', ' ') }}
                 </span>
               </td>
+
+              <td>
+                <div class="acciones-tabla">
+                  <button
+                    type="button"
+                    class="boton-editar"
+                    (click)="editarUnidad(unidad)"
+                    [disabled]="
+                      cambiandoEstadoId() === unidad.id
+                    "
+                  >
+                    Editar
+                  </button>
+
+                  <select
+                    class="selector-estado"
+                    [value]="unidad.estado"
+                    [disabled]="
+                      unidad.estado === 'MANTENIMIENTO' ||
+                      cambiandoEstadoId() === unidad.id
+                    "
+                    (change)="
+                      cambiarEstado(
+                        unidad,
+                        $any($event.target).value
+                      )
+                    "
+                  >
+                    <option value="DISPONIBLE">
+                      Disponible
+                    </option>
+
+                    <option value="EN_RUTA">
+                      En ruta
+                    </option>
+
+                    <option value="FUERA_DE_SERVICIO">
+                      Fuera de servicio
+                    </option>
+
+                    <option
+                      value="MANTENIMIENTO"
+                      disabled
+                    >
+                      Mantenimiento
+                    </option>
+                  </select>
+
+                  @if (
+                    cambiandoEstadoId() === unidad.id
+                  ) {
+                    <span class="procesando-estado">
+                      Actualizando...
+                    </span>
+                  }
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="7" class="sin-registros">
+              <td
+                colspan="8"
+                class="sin-registros"
+              >
                 No hay unidades registradas.
               </td>
             </tr>
