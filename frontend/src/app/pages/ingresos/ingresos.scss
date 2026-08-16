@@ -182,9 +182,14 @@ p {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 28px;
+  align-items: stretch;
 }
 
 .tarjeta {
+  display: flex;
+  min-height: 130px;
+  flex-direction: column;
+  justify-content: space-between;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
@@ -212,6 +217,24 @@ p {
   margin-top: 8px;
   color: #94a3b8;
   font-size: 12px;
+
+  .tarjeta:nth-child(4) {
+    border-color: #fed7aa;
+    background: #fff7ed;
+  }
+
+  .tarjeta:nth-child(4) strong {
+    color: #c2410c;
+  }
+
+  .tarjeta:nth-child(5) {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+  }
+
+  .tarjeta:nth-child(5) strong {
+    color: #15803d;
+  }
 }
 
 .bloque-reporte {

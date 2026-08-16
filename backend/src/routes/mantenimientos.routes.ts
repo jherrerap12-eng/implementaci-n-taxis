@@ -112,6 +112,23 @@ mantenimientosRouter.patch(
         return;
       }
 
+      const fechaActualTexto = new Date()
+        .toISOString()
+        .slice(0, 10);
+
+      const fechaActual = new Date(
+        `${fechaActualTexto}T00:00:00.000Z`,
+      );
+
+      if (fechaFinConvertida > fechaActual) {
+        res.status(400).json({
+          success: false,
+          message:
+            'La fecha de finalización del mantenimiento no puede ser futura',
+        });
+        return;
+      }
+
       const mantenimiento =
         await prisma.mantenimiento.findUnique({
           where: {
@@ -281,6 +298,23 @@ mantenimientosRouter.post(
         return;
       }
 
+      const fechaActualTexto = new Date()
+        .toISOString()
+        .slice(0, 10);
+
+      const fechaActual = new Date(
+        `${fechaActualTexto}T00:00:00.000Z`,
+      );
+
+      if (fechaInicioConvertida > fechaActual) {
+        res.status(400).json({
+          success: false,
+          message:
+            'La fecha de inicio del mantenimiento no puede ser futura',
+        });
+        return;
+      }
+
       const unidad = await prisma.unidad.findUnique({
         where: {
           id: unidadIdConvertido,
@@ -296,6 +330,36 @@ mantenimientosRouter.post(
         return;
       }
 
+      const fechaInicioExclusiva = new Date(
+        fechaInicioConvertida,
+      );
+
+      fechaInicioExclusiva.setUTCDate(
+        fechaInicioExclusiva.getUTCDate() + 1,
+      );
+
+      const operacionExistente =
+        await prisma.registroDiario.findFirst({
+          where: {
+            unidadId: unidadIdConvertido,
+            fecha: {
+              gte: fechaInicioConvertida,
+              lt: fechaInicioExclusiva,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (operacionExistente) {
+        res.status(409).json({
+          success: false,
+          message:
+            'La unidad ya tiene una operación registrada en la fecha seleccionada',
+        });
+        return;
+      }
       if (unidad.estado !== 'DISPONIBLE') {
         res.status(409).json({
           success: false,
@@ -322,38 +386,38 @@ mantenimientosRouter.post(
         return;
       }
 
-const resultado = await prisma.$transaction(
-  async (transaccion) => {
-    const mantenimiento =
-      await transaccion.mantenimiento.create({
-        data: {
-          unidadId: unidadIdConvertido,
-          fechaInicio:
-            fechaInicioConvertida,
-          kilometraje:
-            unidad.kilometrajeActual,
-          descripcion: descripcion.trim(),
-          costo:
-            costoConvertido.toFixed(2),
-        },
-      });
+      const resultado = await prisma.$transaction(
+        async (transaccion) => {
+          const mantenimiento =
+            await transaccion.mantenimiento.create({
+              data: {
+                unidadId: unidadIdConvertido,
+                fechaInicio:
+                  fechaInicioConvertida,
+                kilometraje:
+                  unidad.kilometrajeActual,
+                descripcion: descripcion.trim(),
+                costo:
+                  costoConvertido.toFixed(2),
+              },
+            });
 
-    const unidadActualizada =
-      await transaccion.unidad.update({
-        where: {
-          id: unidadIdConvertido,
-        },
-        data: {
-          estado: 'MANTENIMIENTO',
-        },
-      });
+          const unidadActualizada =
+            await transaccion.unidad.update({
+              where: {
+                id: unidadIdConvertido,
+              },
+              data: {
+                estado: 'MANTENIMIENTO',
+              },
+            });
 
-    return {
-      ...mantenimiento,
-      unidad: unidadActualizada,
-    };
-  },
-);
+          return {
+            ...mantenimiento,
+            unidad: unidadActualizada,
+          };
+        },
+      );
 
       res.status(201).json({
         success: true,
