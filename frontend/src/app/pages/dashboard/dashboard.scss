@@ -99,12 +99,16 @@ p {
 
 .tarjetas-resumen {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
     margin-bottom: 28px;
+    align-items: stretch;
 }
-
 .tarjeta {
+    display: flex;
+    min-height: 125px;
+    flex-direction: column;
+    justify-content: space-between;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 21px;
@@ -132,6 +136,46 @@ p {
     margin-top: 8px;
     color: #94a3b8;
     font-size: 12px;
+
+   /* Mantenimientos */
+.tarjeta:nth-child(4) {
+    border-color: #fed7aa;
+    background: #fff7ed;
+}
+
+.tarjeta:nth-child(4) strong {
+    color: #c2410c;
+}
+
+/* Utilidad operativa */
+.tarjeta:nth-child(5) {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.tarjeta:nth-child(5) strong {
+    color: #15803d;
+}
+
+/* Pendientes de combustible */
+.tarjeta:nth-child(7) {
+    border-color: #fde68a;
+    background: #fffbeb;
+}
+
+.tarjeta:nth-child(7) strong {
+    color: #b45309;
+}
+
+/* Unidades disponibles */
+.tarjeta:nth-child(8) {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.tarjeta:nth-child(8) strong {
+    color: #1d4ed8;
+} 
 }
 
 .accesos-rapidos,

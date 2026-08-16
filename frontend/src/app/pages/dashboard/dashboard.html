@@ -76,35 +76,35 @@
 
         <article class="tarjeta">
             <span class="tarjeta-etiqueta">
+                Mantenimientos
+            </span>
+
+            <strong>
+                Q {{ datos.totales.montoMantenimientos.toFixed(2) }}
+            </strong>
+
+            <small>
+                Gastos registrados hoy
+            </small>
+        </article>
+
+        <article class="tarjeta">
+            <span class="tarjeta-etiqueta">
+                Utilidad operativa
+            </span>
+
+            <strong>
+                Q {{ datos.totales.utilidadOperativa.toFixed(2) }}
+            </strong>
+
+            <small>
+                Liquidado menos gastos registrados
+            </small>
+        </article>
+
+        <article class="tarjeta">
+            <span class="tarjeta-etiqueta">
                 Kilómetros recorridos
-
-                <article class="tarjeta">
-                    <span class="tarjeta-etiqueta">
-                        Pendientes de combustible
-                    </span>
-
-                    <strong>
-                        {{ datos.totales.pendientesCombustible }}
-                    </strong>
-
-                    <small>
-                        Operaciones que todavía deben completarse
-                    </small>
-                </article>
-
-                <article class="tarjeta">
-                    <span class="tarjeta-etiqueta">
-                        Unidades disponibles
-                    </span>
-
-                    <strong>
-                        {{ datos.totales.unidadesDisponibles }}
-                    </strong>
-
-                    <small>
-                        Vehículos disponibles actualmente
-                    </small>
-                </article>
             </span>
 
             <strong>
@@ -113,6 +113,34 @@
 
             <small>
                 Recorrido acumulado del día
+            </small>
+        </article>
+
+        <article class="tarjeta">
+            <span class="tarjeta-etiqueta">
+                Pendientes de combustible
+            </span>
+
+            <strong>
+                {{ datos.totales.pendientesCombustible }}
+            </strong>
+
+            <small>
+                Operaciones que todavía deben completarse
+            </small>
+        </article>
+
+        <article class="tarjeta">
+            <span class="tarjeta-etiqueta">
+                Unidades disponibles
+            </span>
+
+            <strong>
+                {{ datos.totales.unidadesDisponibles }}
+            </strong>
+
+            <small>
+                Vehículos disponibles para hoy
             </small>
         </article>
     </section>

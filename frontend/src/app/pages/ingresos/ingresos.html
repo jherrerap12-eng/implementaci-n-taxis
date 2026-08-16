@@ -101,62 +101,104 @@
       </section>
 
       <div class="tarjetas-totales">
-        <article class="tarjeta">
-          <span class="tarjeta-etiqueta">
-            Monto liquidado
-          </span>
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Monto liquidado
+    </span>
 
-          <strong>
-            Q {{ datos.totales.montoLiquidado.toFixed(2) }}
-          </strong>
+    <strong>
+      Q {{ datos.totales.montoLiquidado.toFixed(2) }}
+    </strong>
 
-          <small>
-            Total reportado durante el período
-          </small>
-        </article>
+    <small>
+      Total reportado durante el período
+    </small>
+  </article>
 
-        <article class="tarjeta">
-          <span class="tarjeta-etiqueta">
-            Combustible
-          </span>
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Combustible
+    </span>
 
-          <strong>
-            Q {{ datos.totales.montoCombustible.toFixed(2) }}
-          </strong>
+    <strong>
+      Q {{ datos.totales.montoCombustible.toFixed(2) }}
+    </strong>
 
-          <small>
-            {{ datos.totales.galones.toFixed(3) }} galones
-          </small>
-        </article>
+    <small>
+      {{ datos.totales.galones.toFixed(3) }} galones
+    </small>
+  </article>
 
-        <article class="tarjeta">
-          <span class="tarjeta-etiqueta">
-            Operaciones
-          </span>
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Mantenimientos
+    </span>
 
-          <strong>
-            {{ datos.totales.operaciones }}
-          </strong>
+    <strong>
+      Q {{ datos.totales.montoMantenimientos.toFixed(2) }}
+    </strong>
 
-          <small>
-            Registros encontrados
-          </small>
-        </article>
+    <small>
+      Gastos de mantenimiento del período
+    </small>
+  </article>
 
-        <article class="tarjeta">
-          <span class="tarjeta-etiqueta">
-            Kilómetros recorridos
-          </span>
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Gastos totales
+    </span>
 
-          <strong>
-            {{ datos.totales.kilometrosRecorridos }} km
-          </strong>
+    <strong>
+      Q {{ datos.totales.gastosTotales.toFixed(2) }}
+    </strong>
 
-          <small>
-            Recorrido acumulado
-          </small>
-        </article>
-      </div>
+    <small>
+      Combustible + mantenimientos
+    </small>
+  </article>
+
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Utilidad operativa
+    </span>
+
+    <strong>
+      Q {{ datos.totales.utilidadOperativa.toFixed(2) }}
+    </strong>
+
+    <small>
+      Liquidado menos gastos registrados
+    </small>
+  </article>
+
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Operaciones
+    </span>
+
+    <strong>
+      {{ datos.totales.operaciones }}
+    </strong>
+
+    <small>
+      Registros encontrados
+    </small>
+  </article>
+
+  <article class="tarjeta">
+    <span class="tarjeta-etiqueta">
+      Kilómetros recorridos
+    </span>
+
+    <strong>
+      {{ datos.totales.kilometrosRecorridos }} km
+    </strong>
+
+    <small>
+      Recorrido acumulado
+    </small>
+  </article>
+</div>
 
       <section class="bloque-reporte">
         <div class="bloque-encabezado">

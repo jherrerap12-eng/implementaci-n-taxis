@@ -9,8 +9,12 @@ export interface TotalesIngresos {
   montoCombustible: number;
   galones: number;
 }
+
 export interface TotalesGeneralesIngresos
   extends TotalesIngresos {
+  montoMantenimientos: number;
+  gastosTotales: number;
+  utilidadOperativa: number;
   pendientesCombustible: number;
   unidadesDisponibles: number;
 }
