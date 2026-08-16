@@ -59,6 +59,7 @@ model Unidad {
 
   registrosDiarios RegistroDiario[]
   mantenimientos   Mantenimiento[]
+  gastos           Gasto[]
 
   @@map("unidades")
 }
@@ -129,4 +130,24 @@ model Mantenimiento {
   @@index([unidadId])
   @@index([estado])
   @@map("mantenimientos")
+}
+enum TipoGasto {
+  REPUESTOS_MENORES
+  PINCHAZO
+}
+model Gasto {
+  id          Int       @id @default(autoincrement())
+  unidadId    Int       @map("unidad_id")
+  fecha       DateTime  @db.Date
+  tipo        TipoGasto
+  descripcion String?
+  monto       Decimal   @db.Decimal(12, 2)
+  creadoEn    DateTime  @default(now()) @map("creado_en")
+
+  unidad Unidad @relation(fields: [unidadId], references: [id])
+
+  @@index([unidadId])
+  @@index([fecha])
+  @@index([tipo])
+  @@map("gastos")
 }

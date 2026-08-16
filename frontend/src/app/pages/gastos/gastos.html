@@ -1,0 +1,256 @@
+<section class="pagina-gastos">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Administración</span>
+      <h1>Gastos de unidades</h1>
+
+      <p>
+        Registra gastos por repuestos menores o pinchazos.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="boton-secundario"
+      (click)="cargarDatos()"
+      [disabled]="cargando()"
+    >
+      {{ cargando() ? 'Actualizando...' : 'Actualizar listado' }}
+    </button>
+  </header>
+
+  @if (mensajeExito()) {
+    <div class="mensaje-exito">
+      {{ mensajeExito() }}
+    </div>
+  }
+
+  @if (mensajeError()) {
+    <div class="mensaje-error">
+      {{ mensajeError() }}
+    </div>
+  }
+
+  <section class="formulario-contenedor">
+    <div class="formulario-encabezado">
+      <div>
+        <h2>Registrar gasto</h2>
+
+        <p>
+          Selecciona la unidad y registra el gasto realizado.
+        </p>
+      </div>
+    </div>
+
+    <form
+      [formGroup]="formularioGasto"
+      (ngSubmit)="registrarGasto()"
+    >
+      <div class="campos">
+        <div class="campo">
+          <label for="unidadId">
+            Unidad *
+          </label>
+
+          <select
+            id="unidadId"
+            formControlName="unidadId"
+          >
+            <option [ngValue]="0">
+              Selecciona una unidad
+            </option>
+
+            @for (unidad of unidades(); track unidad.id) {
+              <option [ngValue]="unidad.id">
+                {{ unidad.numeroUnidad }} -
+                {{ unidad.placa }}
+              </option>
+            }
+          </select>
+
+          @if (
+            formularioGasto.controls.unidadId.touched &&
+            formularioGasto.controls.unidadId.invalid
+          ) {
+            <small>
+              Selecciona una unidad.
+            </small>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="fecha">
+            Fecha *
+          </label>
+
+          <input
+            id="fecha"
+            type="date"
+            formControlName="fecha"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="tipo">
+            Tipo de gasto *
+          </label>
+
+          <select
+            id="tipo"
+            formControlName="tipo"
+          >
+            <option value="REPUESTOS_MENORES">
+              Repuestos menores
+            </option>
+
+            <option value="PINCHAZO">
+              Pinchazo
+            </option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="monto">
+            Monto *
+          </label>
+
+          <input
+            id="monto"
+            type="number"
+            formControlName="monto"
+            min="0.01"
+            step="0.01"
+            placeholder="Ejemplo: 50.00"
+          />
+
+          @if (
+            formularioGasto.controls.monto.touched &&
+            formularioGasto.controls.monto.invalid
+          ) {
+            <small>
+              El monto debe ser mayor a cero.
+            </small>
+          }
+        </div>
+
+        <div class="campo campo-completo">
+          <label for="descripcion">
+            Descripción
+          </label>
+
+          <textarea
+            id="descripcion"
+            rows="3"
+            formControlName="descripcion"
+            placeholder="Ejemplo: Reparación de llanta delantera"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="acciones-formulario">
+        <button
+          type="submit"
+          class="boton-principal"
+          [disabled]="guardando()"
+        >
+          {{
+            guardando()
+              ? 'Guardando...'
+              : 'Registrar gasto'
+          }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (cargando()) {
+    <div class="estado-carga">
+      Cargando gastos...
+    </div>
+  } @else {
+    <section class="listado-gastos">
+      <div class="listado-encabezado">
+        <div>
+          <h2>Gastos registrados</h2>
+
+          <p>
+            Historial de repuestos menores y pinchazos.
+          </p>
+        </div>
+
+        <span class="cantidad-registros">
+          {{ gastos().length }}
+          {{
+            gastos().length === 1
+              ? 'registro'
+              : 'registros'
+          }}
+        </span>
+      </div>
+
+      @if (gastos().length === 0) {
+        <div class="sin-registros">
+          Todavía no hay gastos registrados.
+        </div>
+      } @else {
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Unidad</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (gasto of gastos(); track gasto.id) {
+                <tr>
+                  <td>
+                    {{ gasto.fecha.slice(0, 10) }}
+                  </td>
+
+                  <td>
+                    <strong>
+                      {{ gasto.unidad.numeroUnidad }}
+                    </strong>
+
+                    <small class="placa-unidad">
+                      {{ gasto.unidad.placa }}
+                    </small>
+                  </td>
+
+                  <td>
+                    <span
+                      class="tipo-gasto"
+                      [class.tipo-pinchazo]="
+                        gasto.tipo === 'PINCHAZO'
+                      "
+                    >
+                      {{ obtenerNombreTipo(gasto.tipo) }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{
+                      gasto.descripcion ||
+                        'Sin descripción'
+                    }}
+                  </td>
+
+                  <td>
+                    <strong>
+                      Q {{ formatearMonto(gasto.monto) }}
+                    </strong>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>

@@ -94,7 +94,8 @@ ingresosRouter.get(
       ) {
         res.status(400).json({
           success: false,
-          message: 'La fecha final no es válida',
+          message:
+            'La fecha final no es válida',
         });
         return;
       }
@@ -134,10 +135,6 @@ ingresosRouter.get(
           ],
         });
 
-      /*
-       * Los mantenimientos se consideran gasto dentro del período
-       * según su fecha de inicio.
-       */
       const mantenimientos =
         await prisma.mantenimiento.findMany({
           where: {
@@ -151,6 +148,24 @@ ingresosRouter.get(
             costo: true,
             fechaInicio: true,
             unidadId: true,
+          },
+        });
+
+      // Gastos por repuestos menores y pinchazos.
+      const gastosUnidades =
+        await prisma.gasto.findMany({
+          where: {
+            fecha: {
+              gte: fechaInicio,
+              lt: fechaFinExclusiva,
+            },
+          },
+          select: {
+            id: true,
+            unidadId: true,
+            fecha: true,
+            tipo: true,
+            monto: true,
           },
         });
 
@@ -315,9 +330,39 @@ ingresosRouter.get(
           0,
         );
 
+      const montoRepuestosMenores =
+        gastosUnidades
+          .filter(
+            (gasto) =>
+              gasto.tipo ===
+              'REPUESTOS_MENORES',
+          )
+          .reduce(
+            (total, gasto) =>
+              total + Number(gasto.monto),
+            0,
+          );
+
+      const montoPinchazos =
+        gastosUnidades
+          .filter(
+            (gasto) =>
+              gasto.tipo === 'PINCHAZO',
+          )
+          .reduce(
+            (total, gasto) =>
+              total + Number(gasto.monto),
+            0,
+          );
+
+      const montoGastosUnidades =
+        montoRepuestosMenores +
+        montoPinchazos;
+
       const gastosTotales =
         totales.montoCombustible +
-        montoMantenimientos;
+        montoMantenimientos +
+        montoGastosUnidades;
 
       const utilidadOperativa =
         totales.montoLiquidado -
@@ -358,6 +403,18 @@ ingresosRouter.get(
 
             montoMantenimientos: Number(
               montoMantenimientos.toFixed(2),
+            ),
+
+            montoRepuestosMenores: Number(
+              montoRepuestosMenores.toFixed(2),
+            ),
+
+            montoPinchazos: Number(
+              montoPinchazos.toFixed(2),
+            ),
+
+            montoGastosUnidades: Number(
+              montoGastosUnidades.toFixed(2),
             ),
 
             gastosTotales: Number(

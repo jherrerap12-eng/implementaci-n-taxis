@@ -13,6 +13,9 @@ export interface TotalesIngresos {
 export interface TotalesGeneralesIngresos
   extends TotalesIngresos {
   montoMantenimientos: number;
+  montoRepuestosMenores: number;
+  montoPinchazos: number;
+  montoGastosUnidades: number;
   gastosTotales: number;
   utilidadOperativa: number;
   pendientesCombustible: number;

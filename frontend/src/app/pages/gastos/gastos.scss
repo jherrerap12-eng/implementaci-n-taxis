@@ -1,0 +1,322 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+.pagina-gastos {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.seccion {
+  display: block;
+  margin-bottom: 6px;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 22px;
+}
+
+p {
+  margin: 8px 0 0;
+  color: #64748b;
+}
+
+.boton-principal,
+.boton-secundario {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-principal {
+  background: #2563eb;
+  color: white;
+}
+
+.boton-principal:hover {
+  background: #1d4ed8;
+}
+
+.boton-secundario {
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #334155;
+}
+
+.boton-secundario:hover {
+  background: #f8fafc;
+}
+
+.boton-principal:disabled,
+.boton-secundario:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mensaje-exito,
+.mensaje-error {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.mensaje-exito {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.mensaje-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.formulario-contenedor {
+  margin-bottom: 28px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+}
+
+.formulario-encabezado {
+  margin-bottom: 24px;
+}
+
+.formulario-encabezado p {
+  margin-top: 6px;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+.campo label {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: white;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.campo small {
+  color: #dc2626;
+  font-size: 12px;
+}
+
+.acciones-formulario {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.listado-gastos {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+  overflow: hidden;
+}
+
+.listado-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.listado-encabezado p {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.cantidad-registros {
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+td {
+  color: #334155;
+  font-size: 13px;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.placa-unidad {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.tipo-gasto {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tipo-pinchazo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado-carga,
+.sin-registros {
+  padding: 30px 24px;
+  color: #64748b;
+  text-align: center;
+}
+
+.estado-carga {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+}
+
+@media (max-width: 700px) {
+  .pagina-gastos {
+    padding: 24px 14px;
+  }
+
+  .encabezado {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .boton-secundario {
+    width: 100%;
+  }
+
+  .campos {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .acciones-formulario {
+    flex-direction: column;
+  }
+
+  .acciones-formulario button {
+    width: 100%;
+  }
+
+  .listado-encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
