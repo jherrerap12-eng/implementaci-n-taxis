@@ -136,8 +136,9 @@ p {
     margin-top: 8px;
     color: #94a3b8;
     font-size: 12px;
+}
 
-   /* Mantenimientos */
+/* Mantenimientos */
 .tarjeta:nth-child(4) {
     border-color: #fed7aa;
     background: #fff7ed;
@@ -175,7 +176,179 @@ p {
 
 .tarjeta:nth-child(8) strong {
     color: #1d4ed8;
-} 
+}
+
+/* Alertas de mantenimiento */
+
+.alertas-mantenimiento {
+    margin-bottom: 26px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+    overflow: hidden;
+}
+
+.sin-alertas-mantenimiento {
+    padding: 24px;
+    background: #f0fdf4;
+}
+
+.sin-alertas-mantenimiento strong {
+    display: block;
+    color: #15803d;
+    font-size: 15px;
+}
+
+.sin-alertas-mantenimiento p {
+    margin-top: 5px;
+    color: #166534;
+    font-size: 13px;
+}
+
+.resumen-alertas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.contador-alerta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.contador-alerta span {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.contador-alerta strong {
+    font-size: 30px;
+}
+
+.contador-alerta small {
+    font-size: 12px;
+}
+
+.alerta-requerida {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+}
+
+.alerta-requerida span,
+.alerta-requerida strong {
+    color: #b91c1c;
+}
+
+.alerta-requerida small {
+    color: #991b1b;
+}
+
+.alerta-proxima {
+    border: 1px solid #fde68a;
+    background: #fffbeb;
+}
+
+.alerta-proxima span,
+.alerta-proxima strong {
+    color: #b45309;
+}
+
+.alerta-proxima small {
+    color: #92400e;
+}
+
+.lista-alertas {
+    display: flex;
+    flex-direction: column;
+}
+
+.alerta-unidad {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.alerta-unidad:last-child {
+    border-bottom: 0;
+}
+
+.alerta-unidad > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alerta-tipo {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.alerta-unidad > div:first-child > strong {
+    color: #1e293b;
+    font-size: 16px;
+}
+
+.alerta-unidad small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.alerta-kilometraje {
+    display: flex;
+    min-width: 145px;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alerta-kilometraje span {
+    color: #64748b;
+    font-size: 11px;
+}
+
+.alerta-kilometraje strong {
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.alerta-unidad > a {
+    border-radius: 7px;
+    padding: 9px 12px;
+    background: #2563eb;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.alerta-unidad > a:hover {
+    background: #1d4ed8;
+}
+
+.alerta-unidad-requerida {
+    border-left: 4px solid #dc2626;
+}
+
+.alerta-unidad-requerida .alerta-tipo {
+    color: #b91c1c;
+}
+
+.alerta-unidad-proxima {
+    border-left: 4px solid #f59e0b;
+}
+
+.alerta-unidad-proxima .alerta-tipo {
+    color: #b45309;
 }
 
 .accesos-rapidos,
@@ -314,6 +487,24 @@ tbody tr:last-child td {
     color: #64748b;
     text-align: center;
 }
+    .resumen-alertas {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .alerta-unidad {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .alerta-kilometraje {
+        min-width: 0;
+    }
+
+    .alerta-unidad > a {
+        width: fit-content;
+    }
 
 @media (max-width: 950px) {
     .tarjetas-resumen {

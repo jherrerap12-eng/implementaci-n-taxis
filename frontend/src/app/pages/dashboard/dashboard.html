@@ -31,120 +31,7 @@
     </div>
     } @else {
     @if (resumen(); as datos) {
-    <section class="tarjetas-resumen">
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Operaciones del día
-            </span>
-
-            <strong>
-                {{ datos.totales.operaciones }}
-            </strong>
-
-            <small>
-                Registros realizados
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Monto liquidado
-            </span>
-
-            <strong>
-                Q {{ datos.totales.montoLiquidado.toFixed(2) }}
-            </strong>
-
-            <small>
-                Total reportado hoy
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Combustible
-            </span>
-
-            <strong>
-                Q {{ datos.totales.montoCombustible.toFixed(2) }}
-            </strong>
-
-            <small>
-                {{ datos.totales.galones.toFixed(3) }} galones
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Mantenimientos
-            </span>
-
-            <strong>
-                Q {{ datos.totales.montoMantenimientos.toFixed(2) }}
-            </strong>
-
-            <small>
-                Gastos registrados hoy
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Utilidad operativa
-            </span>
-
-            <strong>
-                Q {{ datos.totales.utilidadOperativa.toFixed(2) }}
-            </strong>
-
-            <small>
-                Liquidado menos gastos registrados
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Kilómetros recorridos
-            </span>
-
-            <strong>
-                {{ datos.totales.kilometrosRecorridos }} km
-            </strong>
-
-            <small>
-                Recorrido acumulado del día
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Pendientes de combustible
-            </span>
-
-            <strong>
-                {{ datos.totales.pendientesCombustible }}
-            </strong>
-
-            <small>
-                Operaciones que todavía deben completarse
-            </small>
-        </article>
-
-        <article class="tarjeta">
-            <span class="tarjeta-etiqueta">
-                Unidades disponibles
-            </span>
-
-            <strong>
-                {{ datos.totales.unidadesDisponibles }}
-            </strong>
-
-            <small>
-                Vehículos disponibles para hoy
-            </small>
-        </article>
-    </section>
-
+    
     <section class="accesos-rapidos">
         <div class="titulo-seccion">
             <div>
@@ -167,17 +54,6 @@
                     </p>
                 </div>
             </a>
-            <a routerLink="/mantenimientos" class="acceso">
-    <span class="acceso-numero">06</span>
-
-    <div>
-        <strong>Mantenimientos</strong>
-
-        <p>
-            Registra y consulta los mantenimientos realizados a las unidades.
-        </p>
-    </div>
-</a>
 
             <a routerLink="/resumen-diario" class="acceso">
                 <span class="acceso-numero">02</span>
@@ -223,6 +99,17 @@
 
                     <p>
                         Consulta y administra los pilotos disponibles.
+                    </p>
+                </div>
+            </a>
+            <a routerLink="/mantenimientos" class="acceso">
+                <span class="acceso-numero">06</span>
+
+                <div>
+                    <strong>Mantenimientos</strong>
+
+                    <p>
+                        Registra y consulta los mantenimientos realizados a las unidades.
                     </p>
                 </div>
             </a>
@@ -297,5 +184,147 @@
         }
     </section>
     }
+    <section class="alertas-mantenimiento">
+        <div class="titulo-seccion">
+            <div>
+                <h2>Alertas de mantenimiento</h2>
+
+                <p>
+                    Unidades que requieren atención según su kilometraje.
+                </p>
+            </div>
+
+            <a routerLink="/unidades">
+                Ver unidades
+            </a>
+        </div>
+
+        @if (
+        mantenimientosRequeridos().length === 0 &&
+        proximosMantenimientos().length === 0
+        ) {
+        <div class="sin-alertas-mantenimiento">
+            <strong>Sin alertas de mantenimiento</strong>
+
+            <p>
+                Ninguna unidad está próxima o ha alcanzado su kilometraje de servicio.
+            </p>
+        </div>
+        } @else {
+        <div class="resumen-alertas">
+            <article class="contador-alerta alerta-requerida">
+                <span>Servicio requerido</span>
+
+                <strong>
+                    {{ mantenimientosRequeridos().length }}
+                </strong>
+
+                <small>
+                    Unidades que alcanzaron o superaron su límite
+                </small>
+            </article>
+
+            <article class="contador-alerta alerta-proxima">
+                <span>Próximas a servicio</span>
+
+                <strong>
+                    {{ proximosMantenimientos().length }}
+                </strong>
+
+                <small>
+                    Unidades a 500 km o menos del servicio
+                </small>
+            </article>
+        </div>
+
+        <div class="lista-alertas">
+            @for (
+            unidad of mantenimientosRequeridos();
+            track unidad.id
+            ) {
+            <article class="alerta-unidad alerta-unidad-requerida">
+                <div>
+                    <span class="alerta-tipo">
+                        Servicio requerido
+                    </span>
+
+                    <strong>
+                        {{ unidad.numeroUnidad }}
+                    </strong>
+
+                    <small>
+                        {{ unidad.marca }} {{ unidad.modelo }} ·
+                        {{ unidad.placa }}
+                    </small>
+                </div>
+
+                <div class="alerta-kilometraje">
+                    <span>
+                        Actual
+                    </span>
+
+                    <strong>
+                        {{ unidad.kilometrajeActual }} km
+                    </strong>
+
+                    <small>
+                        Límite:
+                        {{ unidad.proximoMantenimientoKm }} km
+                    </small>
+                </div>
+
+                <a routerLink="/mantenimientos">
+                    Registrar mantenimiento
+                </a>
+            </article>
+            }
+
+            @for (
+            unidad of proximosMantenimientos();
+            track unidad.id
+            ) {
+            <article class="alerta-unidad alerta-unidad-proxima">
+                <div>
+                    <span class="alerta-tipo">
+                        Próxima a servicio
+                    </span>
+
+                    <strong>
+                        {{ unidad.numeroUnidad }}
+                    </strong>
+
+                    <small>
+                        {{ unidad.marca }} {{ unidad.modelo }} ·
+                        {{ unidad.placa }}
+                    </small>
+                </div>
+
+                <div class="alerta-kilometraje">
+                    <span>
+                        Actual
+                    </span>
+
+                    <strong>
+                        {{ unidad.kilometrajeActual }} km
+                    </strong>
+
+                    <small>
+                        Faltan
+                        {{
+                        unidad.proximoMantenimientoKm! -
+                        unidad.kilometrajeActual
+                        }}
+                        km
+                    </small>
+                </div>
+
+                <a routerLink="/unidades">
+                    Ver unidad
+                </a>
+            </article>
+            }
+        </div>
+        }
+    </section>
     }
 </section>
