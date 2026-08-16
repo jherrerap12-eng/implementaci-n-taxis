@@ -50,6 +50,8 @@ model Unidad {
   anio              Int
   tipoCombustible   TipoCombustible @map("tipo_combustible")
   kilometrajeActual Int             @map("kilometraje_actual")
+  intervaloMantenimientoKm Int? @map("intervalo_mantenimiento_km")
+  proximoMantenimientoKm   Int? @map("proximo_mantenimiento_km")
   estado            EstadoUnidad    @default(DISPONIBLE)
   observaciones     String?
   creadoEn          DateTime        @default(now()) @map("creado_en")

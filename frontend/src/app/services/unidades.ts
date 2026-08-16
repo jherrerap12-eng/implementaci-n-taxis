@@ -17,6 +17,8 @@ export interface Unidad {
   anio: number;
   tipoCombustible: 'GASOLINA' | 'DIESEL';
   kilometrajeActual: number;
+  intervaloMantenimientoKm: number | null;
+  proximoMantenimientoKm: number | null;
   estado: EstadoUnidad;
   observaciones: string | null;
   creadoEn: string;
@@ -31,6 +33,8 @@ export interface CrearUnidadRequest {
   anio: number;
   tipoCombustible: 'GASOLINA' | 'DIESEL';
   kilometrajeActual: number;
+  intervaloMantenimientoKm?: number | null;
+  proximoMantenimientoKm?: number | null;
   observaciones?: string;
 }
 
@@ -41,6 +45,8 @@ export interface ActualizarUnidadRequest {
   modelo?: string;
   anio?: number;
   tipoCombustible?: 'GASOLINA' | 'DIESEL';
+  intervaloMantenimientoKm?: number | null;
+  proximoMantenimientoKm?: number | null;
   observaciones?: string;
 }
 

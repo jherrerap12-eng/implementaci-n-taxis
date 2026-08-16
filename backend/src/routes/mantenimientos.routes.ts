@@ -182,6 +182,14 @@ mantenimientosRouter.patch(
               },
             });
 
+          const proximoMantenimientoKm =
+            mantenimiento.unidad
+              .intervaloMantenimientoKm !== null
+              ? mantenimiento.unidad.kilometrajeActual +
+              mantenimiento.unidad
+                .intervaloMantenimientoKm
+              : null;
+
           const unidadActualizada =
             await transaccion.unidad.update({
               where: {
@@ -189,6 +197,7 @@ mantenimientosRouter.patch(
               },
               data: {
                 estado: 'DISPONIBLE',
+                proximoMantenimientoKm,
               },
             });
 

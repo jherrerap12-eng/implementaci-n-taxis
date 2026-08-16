@@ -80,6 +80,22 @@ export class Unidades implements OnInit {
         ],
       ],
 
+      intervaloMantenimientoKm:
+        this.formBuilder.control<number | null>(
+          null,
+          [
+            Validators.min(1),
+          ],
+        ),
+
+      proximoMantenimientoKm:
+        this.formBuilder.control<number | null>(
+          null,
+          [
+            Validators.min(0),
+          ],
+        ),
+
       observaciones: [''],
     });
 
@@ -123,6 +139,8 @@ export class Unidades implements OnInit {
       anio: new Date().getFullYear(),
       tipoCombustible: 'GASOLINA',
       kilometrajeActual: 0,
+      intervaloMantenimientoKm: null,
+      proximoMantenimientoKm: null,
       observaciones: '',
     });
 
@@ -143,6 +161,10 @@ export class Unidades implements OnInit {
       tipoCombustible: unidad.tipoCombustible,
       kilometrajeActual:
         unidad.kilometrajeActual,
+      intervaloMantenimientoKm:
+        unidad.intervaloMantenimientoKm,
+      proximoMantenimientoKm:
+        unidad.proximoMantenimientoKm,
       observaciones:
         unidad.observaciones ?? '',
     });
@@ -161,6 +183,8 @@ export class Unidades implements OnInit {
       anio: new Date().getFullYear(),
       tipoCombustible: 'GASOLINA',
       kilometrajeActual: 0,
+      intervaloMantenimientoKm: null,
+      proximoMantenimientoKm: null,
       observaciones: '',
     });
 
@@ -171,6 +195,10 @@ export class Unidades implements OnInit {
   guardarUnidad(): void {
     if (this.formularioUnidad.invalid) {
       this.formularioUnidad.markAllAsTouched();
+      return;
+    }
+
+    if (!this.validarPlanMantenimiento()) {
       return;
     }
 
@@ -185,8 +213,40 @@ export class Unidades implements OnInit {
   }
 
   registrarUnidad(): void {
-    const datos: CrearUnidadRequest =
+    const formulario =
       this.formularioUnidad.getRawValue();
+
+    const datos: CrearUnidadRequest = {
+      numeroUnidad:
+        formulario.numeroUnidad,
+
+      placa:
+        formulario.placa,
+
+      marca:
+        formulario.marca,
+
+      modelo:
+        formulario.modelo,
+
+      anio:
+        formulario.anio,
+
+      tipoCombustible:
+        formulario.tipoCombustible,
+
+      kilometrajeActual:
+        formulario.kilometrajeActual,
+
+      intervaloMantenimientoKm:
+        formulario.intervaloMantenimientoKm,
+
+      proximoMantenimientoKm:
+        formulario.proximoMantenimientoKm,
+
+      observaciones:
+        formulario.observaciones,
+    };
 
     this.guardando.set(true);
     this.mensajeError.set('');
@@ -245,6 +305,12 @@ export class Unidades implements OnInit {
 
       tipoCombustible:
         formulario.tipoCombustible,
+
+      intervaloMantenimientoKm:
+        formulario.intervaloMantenimientoKm,
+
+      proximoMantenimientoKm:
+        formulario.proximoMantenimientoKm,
 
       observaciones:
         formulario.observaciones,
@@ -353,5 +419,31 @@ export class Unidades implements OnInit {
 
   estaEditando(): boolean {
     return this.unidadEditandoId() !== null;
+  }
+
+  private validarPlanMantenimiento(): boolean {
+    const intervalo =
+      this.formularioUnidad.controls
+        .intervaloMantenimientoKm.value;
+
+    const proximo =
+      this.formularioUnidad.controls
+        .proximoMantenimientoKm.value;
+
+    const tieneIntervalo =
+      intervalo !== null;
+
+    const tieneProximo =
+      proximo !== null;
+
+    if (tieneIntervalo !== tieneProximo) {
+      this.mensajeError.set(
+        'Para configurar el plan de mantenimiento debes indicar el intervalo y el próximo kilometraje',
+      );
+
+      return false;
+    }
+
+    return true;
   }
 }

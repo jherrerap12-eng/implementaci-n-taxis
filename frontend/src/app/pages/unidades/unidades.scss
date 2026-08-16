@@ -271,6 +271,179 @@ tbody tr:last-child td {
   background: white;
 }
 
+.acciones-tabla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.boton-editar {
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 11px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-editar:hover {
+  background: #bfdbfe;
+}
+
+.boton-editar:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.selector-estado {
+  min-width: 145px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  padding: 7px 9px;
+  background: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.selector-estado:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.selector-estado:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  background: #f3f4f6;
+}
+
+.procesando-estado {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Plan de mantenimiento */
+
+.mantenimiento-sin-plan,
+.mantenimiento-proximo,
+.mantenimiento-vencido,
+.mantenimiento-correcto {
+  display: flex;
+  min-width: 145px;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.mantenimiento-sin-plan strong,
+.mantenimiento-proximo strong,
+.mantenimiento-vencido strong,
+.mantenimiento-correcto strong {
+  font-size: 12px;
+}
+
+.mantenimiento-sin-plan small,
+.mantenimiento-proximo small,
+.mantenimiento-vencido small,
+.mantenimiento-correcto small {
+  font-size: 11px;
+}
+
+/* Sin plan configurado */
+.mantenimiento-sin-plan {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.mantenimiento-sin-plan strong {
+  color: #64748b;
+}
+
+.mantenimiento-sin-plan small {
+  color: #94a3b8;
+}
+
+/* Más de 500 km disponibles */
+.mantenimiento-correcto {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+}
+
+.mantenimiento-correcto strong {
+  color: #15803d;
+}
+
+.mantenimiento-correcto small {
+  color: #166534;
+}
+
+/* Faltan 500 km o menos */
+.mantenimiento-proximo {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+}
+
+.mantenimiento-proximo strong {
+  color: #b45309;
+}
+
+.mantenimiento-proximo small {
+  color: #92400e;
+}
+
+/* Ya alcanzó o superó el kilometraje */
+.mantenimiento-vencido {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+}
+
+.mantenimiento-vencido strong {
+  color: #b91c1c;
+}
+
+.mantenimiento-vencido small {
+  color: #991b1b;
+}
+
+@media (max-width: 700px) {
+  .pagina-unidades {
+    padding: 24px 14px;
+  }
+
+  .encabezado {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acciones-encabezado {
+    flex-direction: column;
+  }
+
+  .campos {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .acciones-formulario {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-formulario button {
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
+
 @media (max-width: 700px) {
   .pagina-unidades {
     padding: 24px 14px;

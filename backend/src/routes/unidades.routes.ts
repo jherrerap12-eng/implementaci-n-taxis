@@ -11,6 +11,8 @@ interface CrearUnidadBody {
   anio?: number | string;
   tipoCombustible?: 'GASOLINA' | 'DIESEL';
   kilometrajeActual?: number | string;
+  intervaloMantenimientoKm?: number | string | null;
+  proximoMantenimientoKm?: number | string | null;
   observaciones?: string;
 }
 
@@ -21,14 +23,16 @@ interface ActualizarUnidadBody {
   modelo?: string;
   anio?: number | string;
   tipoCombustible?: 'GASOLINA' | 'DIESEL';
+  intervaloMantenimientoKm?: number | string | null;
+  proximoMantenimientoKm?: number | string | null;
   observaciones?: string;
 }
 
 interface CambiarEstadoUnidadBody {
   estado?:
-    | 'DISPONIBLE'
-    | 'EN_RUTA'
-    | 'FUERA_DE_SERVICIO';
+  | 'DISPONIBLE'
+  | 'EN_RUTA'
+  | 'FUERA_DE_SERVICIO';
 }
 
 export const unidadesRouter = Router();
@@ -87,6 +91,8 @@ unidadesRouter.post(
         anio,
         tipoCombustible,
         kilometrajeActual,
+        intervaloMantenimientoKm,
+        proximoMantenimientoKm,
         observaciones,
       } = req.body;
 
@@ -151,6 +157,62 @@ unidadesRouter.post(
         return;
       }
 
+      const intervaloVacio =
+        intervaloMantenimientoKm === undefined ||
+        intervaloMantenimientoKm === null ||
+        intervaloMantenimientoKm === '';
+
+      const proximoVacio =
+        proximoMantenimientoKm === undefined ||
+        proximoMantenimientoKm === null ||
+        proximoMantenimientoKm === '';
+
+      if (intervaloVacio !== proximoVacio) {
+        res.status(400).json({
+          success: false,
+          message:
+            'Para configurar el plan de mantenimiento debes indicar el intervalo y el próximo kilometraje',
+        });
+        return;
+      }
+
+      let intervaloConvertido: number | null = null;
+      let proximoConvertido: number | null = null;
+
+      if (!intervaloVacio && !proximoVacio) {
+        intervaloConvertido = Number(
+          intervaloMantenimientoKm,
+        );
+
+        proximoConvertido = Number(
+          proximoMantenimientoKm,
+        );
+
+        if (
+          !Number.isInteger(intervaloConvertido) ||
+          intervaloConvertido <= 0
+        ) {
+          res.status(400).json({
+            success: false,
+            message:
+              'El intervalo de mantenimiento debe ser un número entero mayor a cero',
+          });
+          return;
+        }
+
+        if (
+          !Number.isInteger(proximoConvertido) ||
+          proximoConvertido < 0
+        ) {
+          res.status(400).json({
+            success: false,
+            message:
+              'El próximo kilometraje de mantenimiento no es válido',
+          });
+          return;
+        }
+      }
+
       const unidad = await prisma.unidad.create({
         data: {
           numeroUnidad:
@@ -167,6 +229,12 @@ unidadesRouter.post(
           kilometrajeActual:
             kilometrajeConvertido,
 
+          intervaloMantenimientoKm:
+            intervaloConvertido,
+
+          proximoMantenimientoKm:
+            proximoConvertido,
+
           observaciones:
             observaciones?.trim() || null,
         },
@@ -180,7 +248,7 @@ unidadesRouter.post(
     } catch (error) {
       if (
         error instanceof
-          Prisma.PrismaClientKnownRequestError &&
+        Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         res.status(409).json({
@@ -253,6 +321,8 @@ unidadesRouter.patch(
         modelo,
         anio,
         tipoCombustible,
+        intervaloMantenimientoKm,
+        proximoMantenimientoKm,
         observaciones,
       } = req.body;
 
@@ -339,6 +409,88 @@ unidadesRouter.patch(
         return;
       }
 
+      const modificarPlan =
+        intervaloMantenimientoKm !== undefined ||
+        proximoMantenimientoKm !== undefined;
+
+      let intervaloConvertido:
+        | number
+        | null
+        | undefined;
+
+      let proximoConvertido:
+        | number
+        | null
+        | undefined;
+
+      if (modificarPlan) {
+        const intervaloVacio =
+          intervaloMantenimientoKm === null ||
+          intervaloMantenimientoKm === '';
+
+        const proximoVacio =
+          proximoMantenimientoKm === null ||
+          proximoMantenimientoKm === '';
+
+        if (
+          intervaloMantenimientoKm === undefined ||
+          proximoMantenimientoKm === undefined
+        ) {
+          res.status(400).json({
+            success: false,
+            message:
+              'Para modificar el plan de mantenimiento debes indicar el intervalo y el próximo kilometraje',
+          });
+          return;
+        }
+
+        if (intervaloVacio !== proximoVacio) {
+          res.status(400).json({
+            success: false,
+            message:
+              'El intervalo y el próximo kilometraje deben configurarse juntos',
+          });
+          return;
+        }
+
+        if (intervaloVacio && proximoVacio) {
+          intervaloConvertido = null;
+          proximoConvertido = null;
+        } else {
+          intervaloConvertido = Number(
+            intervaloMantenimientoKm,
+          );
+
+          proximoConvertido = Number(
+            proximoMantenimientoKm,
+          );
+
+          if (
+            !Number.isInteger(intervaloConvertido) ||
+            intervaloConvertido <= 0
+          ) {
+            res.status(400).json({
+              success: false,
+              message:
+                'El intervalo de mantenimiento debe ser un número entero mayor a cero',
+            });
+            return;
+          }
+
+          if (
+            !Number.isInteger(proximoConvertido) ||
+            proximoConvertido < 0
+          ) {
+            res.status(400).json({
+              success: false,
+              message:
+                'El próximo kilometraje de mantenimiento no es válido',
+            });
+            return;
+          }
+        }
+      }
+
       const unidadActualizada =
         await prisma.unidad.update({
           where: {
@@ -347,49 +499,59 @@ unidadesRouter.patch(
           data: {
             ...(numeroUnidad !== undefined
               ? {
-                  numeroUnidad:
-                    numeroUnidad
-                      .trim()
-                      .toUpperCase(),
-                }
+                numeroUnidad:
+                  numeroUnidad
+                    .trim()
+                    .toUpperCase(),
+              }
               : {}),
 
             ...(placa !== undefined
               ? {
-                  placa:
-                    placa.trim().toUpperCase(),
-                }
+                placa:
+                  placa.trim().toUpperCase(),
+              }
               : {}),
 
             ...(marca !== undefined
               ? {
-                  marca: marca.trim(),
-                }
+                marca: marca.trim(),
+              }
               : {}),
 
             ...(modelo !== undefined
               ? {
-                  modelo: modelo.trim(),
-                }
+                modelo: modelo.trim(),
+              }
               : {}),
 
             ...(anioConvertido !== undefined
               ? {
-                  anio: anioConvertido,
-                }
+                anio: anioConvertido,
+              }
               : {}),
 
             ...(tipoCombustible !== undefined
               ? {
-                  tipoCombustible,
-                }
+                tipoCombustible,
+              }
+              : {}),
+
+            ...(modificarPlan
+              ? {
+                intervaloMantenimientoKm:
+                  intervaloConvertido,
+
+                proximoMantenimientoKm:
+                  proximoConvertido,
+              }
               : {}),
 
             ...(observaciones !== undefined
               ? {
-                  observaciones:
-                    observaciones.trim() || null,
-                }
+                observaciones:
+                  observaciones.trim() || null,
+              }
               : {}),
           },
         });
@@ -403,7 +565,7 @@ unidadesRouter.patch(
     } catch (error) {
       if (
         error instanceof
-          Prisma.PrismaClientKnownRequestError &&
+        Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
         res.status(409).json({
