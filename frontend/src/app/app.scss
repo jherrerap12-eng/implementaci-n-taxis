@@ -16,7 +16,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  gap: 18px;
+  max-width: 1440px;
   min-height: 72px;
   margin: 0 auto;
   padding: 0 24px;
@@ -60,6 +61,9 @@
 .navegacion {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -85,6 +89,50 @@
   color: #1d4ed8;
 }
 
+.sesion-usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.datos-usuario {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.datos-usuario strong,
+.datos-usuario small {
+  display: block;
+}
+
+.datos-usuario strong {
+  color: #1e293b;
+  font-size: 13px;
+}
+
+.datos-usuario small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.boton-salir {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: white;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-salir:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
 main {
   min-height: calc(100vh - 72px);
 }
@@ -99,10 +147,22 @@ main {
 
   .navegacion {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .navegacion a {
     flex: 1;
     text-align: center;
+  }
+
+  .sesion-usuario {
+    justify-content: space-between;
+    width: 100%;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+  }
+
+  .datos-usuario {
+    text-align: left;
   }
 }

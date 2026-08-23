@@ -123,7 +123,7 @@ ingresosRouter.get(
           include: {
             piloto: true,
             unidad: true,
-            cargasCombustible: true,
+            cargaCombustible: true,
           },
           orderBy: [
             {
@@ -223,19 +223,13 @@ ingresosRouter.get(
         new Map<number, ResumenPorPiloto>();
 
       for (const registro of registros) {
-        const montoCombustible =
-          registro.cargasCombustible.reduce(
-            (total, carga) =>
-              total + Number(carga.monto),
-            0,
-          );
+        const montoCombustible = Number(
+          registro.cargaCombustible?.monto ?? 0,
+        );
 
-        const galones =
-          registro.cargasCombustible.reduce(
-            (total, carga) =>
-              total + Number(carga.galones),
-            0,
-          );
+        const galones = Number(
+          registro.cargaCombustible?.galones ?? 0,
+        );
 
         const valoresRegistro: TotalesIngresos = {
           operaciones: 1,

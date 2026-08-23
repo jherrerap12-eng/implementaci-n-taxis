@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 
 import { Prisma } from '../generated/prisma/client.js';
 import { prisma } from '../lib/prisma.js';
+import { autorizarRoles } from '../middleware/autorizar-roles.js';
 
 interface CrearUnidadBody {
   numeroUnidad?: string;
@@ -40,6 +41,7 @@ export const unidadesRouter = Router();
 // Obtiene todas las unidades registradas.
 unidadesRouter.get(
   '/',
+  autorizarRoles('SUPERADMIN'),
   async (
     _req: Request,
     res: Response,
@@ -74,6 +76,7 @@ unidadesRouter.get(
 // Registra una nueva unidad.
 unidadesRouter.post(
   '/',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<
       Record<string, never>,
@@ -276,6 +279,7 @@ unidadesRouter.post(
 // Edita la información administrativa de una unidad.
 unidadesRouter.patch(
   '/:id',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<
       { id: string },
@@ -593,6 +597,7 @@ unidadesRouter.patch(
 // Cambia manualmente el estado operativo de una unidad.
 unidadesRouter.patch(
   '/:id/estado',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<
       { id: string },

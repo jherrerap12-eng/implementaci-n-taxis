@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 
+import { Prisma } from '../generated/prisma/client.js';
 import { prisma } from '../lib/prisma.js';
+import { autorizarRoles } from '../middleware/autorizar-roles.js';
 
 interface CrearRegistroDiarioBody {
   pilotoId?: number | string;
@@ -23,6 +25,7 @@ export const registrosDiariosRouter = Router();
 // Obtiene los pilotos y unidades disponibles para una fecha.
 registrosDiariosRouter.get(
   '/disponibilidad',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<
       Record<string, never>,
@@ -154,6 +157,7 @@ registrosDiariosRouter.get(
 
 registrosDiariosRouter.get(
   '/resumen',
+  autorizarRoles('SUPERADMIN', 'DUENO'),
   async (
     req: Request<Record<string, never>, unknown, unknown, { fecha?: string }>,
     res: Response,
@@ -186,7 +190,7 @@ registrosDiariosRouter.get(
         include: {
           piloto: true,
           unidad: true,
-          cargasCombustible: true,
+          cargaCombustible: true,
         },
         orderBy: {
           creadoEn: 'asc',
@@ -199,17 +203,13 @@ registrosDiariosRouter.get(
             registro.kilometrajeFinal -
             registro.kilometrajeInicial;
 
-          const totalCombustible =
-            registro.cargasCombustible.reduce(
-              (total, carga) => total + Number(carga.monto),
-              0,
-            );
+          const totalCombustible = Number(
+            registro.cargaCombustible?.monto ?? 0,
+          );
 
-          const totalGalones =
-            registro.cargasCombustible.reduce(
-              (total, carga) => total + Number(carga.galones),
-              0,
-            );
+          const totalGalones = Number(
+            registro.cargaCombustible?.galones ?? 0,
+          );
 
           acumulado.operaciones += 1;
           acumulado.kilometrosRecorridos += kilometrosRecorridos;
@@ -260,6 +260,7 @@ registrosDiariosRouter.get(
 // Obtiene un registro diario específico por su identificador.
 registrosDiariosRouter.get(
   '/:id',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<{ id: string }>,
     res: Response,
@@ -282,7 +283,7 @@ registrosDiariosRouter.get(
         include: {
           piloto: true,
           unidad: true,
-          cargasCombustible: true,
+          cargaCombustible: true,
         },
       });
 
@@ -315,6 +316,7 @@ registrosDiariosRouter.get(
 // Registra la operación diaria de una unidad.
 registrosDiariosRouter.post(
   '/',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<Record<string, never>, unknown, CrearRegistroDiarioBody>,
     res: Response,
@@ -383,10 +385,36 @@ registrosDiariosRouter.post(
 
       const fechaRegistro = new Date(`${fecha}T00:00:00.000Z`);
 
-      if (Number.isNaN(fechaRegistro.getTime())) {
+      if (
+        Number.isNaN(fechaRegistro.getTime()) ||
+        fechaRegistro.toISOString().slice(0, 10) !== fecha
+      ) {
         res.status(400).json({
           success: false,
           message: 'La fecha ingresada no es válida',
+        });
+        return;
+      }
+
+      const ahora = new Date();
+      const diferenciaZonaHoraria =
+        ahora.getTimezoneOffset() * 60_000;
+
+      const fechaActualTexto = new Date(
+        ahora.getTime() - diferenciaZonaHoraria,
+      )
+        .toISOString()
+        .slice(0, 10);
+
+      const fechaActual = new Date(
+        `${fechaActualTexto}T00:00:00.000Z`,
+      );
+
+      if (fechaRegistro > fechaActual) {
+        res.status(400).json({
+          success: false,
+          message:
+            'La fecha del registro no puede ser futura',
         });
         return;
       }
@@ -494,6 +522,31 @@ if (registroDeLaUnidad) {
   return;
 }
 
+      const ultimaOperacionUnidad =
+        await prisma.registroDiario.findFirst({
+          where: {
+            unidadId: unidadIdConvertido,
+          },
+          select: {
+            fecha: true,
+          },
+          orderBy: {
+            fecha: 'desc',
+          },
+        });
+
+      if (
+        ultimaOperacionUnidad &&
+        fechaRegistro < ultimaOperacionUnidad.fecha
+      ) {
+        res.status(409).json({
+          success: false,
+          message:
+            'No puedes registrar una operación anterior a la última operación de la unidad',
+        });
+        return;
+      }
+
       const kilometrajeInicial = unidad.kilometrajeActual;
 
       if (kilometrajeFinalConvertido < kilometrajeInicial) {
@@ -541,6 +594,45 @@ if (registroDeLaUnidad) {
         data: registro,
       });
     } catch (error) {
+      if (
+        error instanceof
+          Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        const restriccion = String(
+          error.meta?.target ?? '',
+        ).toLowerCase();
+
+        let message =
+          'El piloto o la unidad ya tiene una operación registrada en esta fecha';
+
+        if (
+          restriccion.includes(
+            'uq_registros_diarios_piloto_fecha',
+          ) ||
+          (restriccion.includes('piloto_id') &&
+            restriccion.includes('fecha'))
+        ) {
+          message =
+            'El piloto seleccionado ya tiene una operación registrada en esta fecha';
+        } else if (
+          restriccion.includes(
+            'uq_registros_diarios_unidad_fecha',
+          ) ||
+          (restriccion.includes('unidad_id') &&
+            restriccion.includes('fecha'))
+        ) {
+          message =
+            'La unidad seleccionada ya tiene una operación registrada en esta fecha';
+        }
+
+        res.status(409).json({
+          success: false,
+          message,
+        });
+        return;
+      }
+
       console.error('Error al registrar la operación diaria:', error);
 
       res.status(500).json({
@@ -554,6 +646,7 @@ if (registroDeLaUnidad) {
 // Registra el combustible y completa la operación diaria.
 registrosDiariosRouter.post(
   '/:id/combustible',
+  autorizarRoles('SUPERADMIN'),
   async (
     req: Request<
       { id: string },
@@ -605,29 +698,56 @@ registrosDiariosRouter.post(
 
       // Permite completar el registro cuando la unidad no cargó combustible.
       if (sinCombustible) {
-        const registroActualizado =
-          await prisma.registroDiario.update({
-            where: {
-              id: registroId,
-            },
-            data: {
-              estado: 'COMPLETADO',
-            },
-            include: {
-              piloto: true,
-              unidad: true,
-              cargasCombustible: true,
-            },
+        const resultado = await prisma.$transaction(
+          async (transaccion) => {
+            const actualizacion =
+              await transaccion.registroDiario.updateMany({
+                where: {
+                  id: registroId,
+                  estado: 'PENDIENTE_COMBUSTIBLE',
+                },
+                data: {
+                  estado: 'COMPLETADO',
+                },
+              });
+
+            if (actualizacion.count === 0) {
+              return null;
+            }
+
+            const registroActualizado =
+              await transaccion.registroDiario.findUniqueOrThrow({
+                where: {
+                  id: registroId,
+                },
+                include: {
+                  piloto: true,
+                  unidad: true,
+                  cargaCombustible: true,
+                },
+              });
+
+            return {
+              registro: registroActualizado,
+              carga: null,
+            };
+          },
+        );
+
+        if (!resultado) {
+          res.status(409).json({
+            success: false,
+            message:
+              'Este registro diario ya fue procesado',
           });
+          return;
+        }
 
         res.status(200).json({
           success: true,
           message:
             'Operación completada sin carga de combustible',
-          data: {
-            registro: registroActualizado,
-            carga: null,
-          },
+          data: resultado,
         });
 
         return;
@@ -680,6 +800,21 @@ registrosDiariosRouter.post(
 
       const resultado = await prisma.$transaction(
         async (transaccion) => {
+          const actualizacion =
+            await transaccion.registroDiario.updateMany({
+              where: {
+                id: registroId,
+                estado: 'PENDIENTE_COMBUSTIBLE',
+              },
+              data: {
+                estado: 'COMPLETADO',
+              },
+            });
+
+          if (actualizacion.count === 0) {
+            return null;
+          }
+
           const carga =
             await transaccion.cargaCombustible.create({
               data: {
@@ -692,17 +827,14 @@ registrosDiariosRouter.post(
             });
 
           const registroActualizado =
-            await transaccion.registroDiario.update({
+            await transaccion.registroDiario.findUniqueOrThrow({
               where: {
                 id: registroId,
-              },
-              data: {
-                estado: 'COMPLETADO',
               },
               include: {
                 piloto: true,
                 unidad: true,
-                cargasCombustible: true,
+                cargaCombustible: true,
               },
             });
 
@@ -712,6 +844,15 @@ registrosDiariosRouter.post(
           };
         },
       );
+
+      if (!resultado) {
+        res.status(409).json({
+          success: false,
+          message:
+            'Este registro diario ya fue procesado',
+        });
+        return;
+      }
 
       res.status(201).json({
         success: true,

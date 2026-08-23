@@ -44,7 +44,7 @@ export interface RegistroDiario {
   actualizadoEn: string;
   piloto: Piloto;
   unidad: Unidad;
-  cargasCombustible?: CargaCombustible[];
+  cargaCombustible?: CargaCombustible | null;
 }
 
 export interface ResultadoCombustible {

@@ -99,25 +99,23 @@ export class ResumenDiarioComponent implements OnInit {
   obtenerMontoCombustible(
     registro: RegistroDiario,
   ): number {
-    return (registro.cargasCombustible ?? []).reduce(
-      (total, carga) => total + Number(carga.monto),
-      0,
+    return Number(
+      registro.cargaCombustible?.monto ?? 0,
     );
   }
 
   obtenerGalones(
     registro: RegistroDiario,
   ): number {
-    return (registro.cargasCombustible ?? []).reduce(
-      (total, carga) => total + Number(carga.galones),
-      0,
+    return Number(
+      registro.cargaCombustible?.galones ?? 0,
     );
   }
 
   tieneCombustible(
     registro: RegistroDiario,
   ): boolean {
-    return (registro.cargasCombustible?.length ?? 0) > 0;
+    return registro.cargaCombustible != null;
   }
 
   private obtenerFechaActual(): string {

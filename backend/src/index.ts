@@ -1,19 +1,27 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { type Request, type Response } from 'express';
+import helmet from 'helmet';
 
 import { prisma } from './lib/prisma.js';
+import { autenticar } from './middleware/autenticar.js';
+import { autorizarRoles } from './middleware/autorizar-roles.js';
+import { authRouter } from './routes/auth.routes.js';
 import { pilotosRouter } from './routes/pilotos.routes.js';
 import { unidadesRouter } from './routes/unidades.routes.js';
 import { registrosDiariosRouter } from './routes/registros-diarios.routes.js';
 import { ingresosRouter } from './routes/ingresos.routes.js';
 import { mantenimientosRouter } from './routes/mantenimientos.routes.js';
 import { gastosRouter } from './routes/gastos.routes.js';
+import { usuariosRouter } from './routes/usuarios.routes.js';
+import { dashboardRouter } from './routes/dashboard.routes.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+app.use(helmet());
 
 app.use(
   cors({
@@ -26,12 +34,53 @@ app.use(
 
 app.use(express.json());
 
-app.use('/api/pilotos', pilotosRouter);
-app.use('/api/unidades', unidadesRouter);
-app.use('/api/registros-diarios', registrosDiariosRouter);
-app.use('/api/ingresos', ingresosRouter);
-app.use('/api/mantenimientos', mantenimientosRouter);
-app.use('/api/gastos', gastosRouter);
+app.use('/api/auth', authRouter);
+app.use(
+  '/api/dashboard',
+  autenticar,
+  autorizarRoles('SUPERADMIN', 'DUENO'),
+  dashboardRouter,
+);
+app.use(
+  '/api/usuarios',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  usuariosRouter,
+);
+app.use(
+  '/api/pilotos',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  pilotosRouter,
+);
+app.use(
+  '/api/unidades',
+  autenticar,
+  unidadesRouter,
+);
+app.use(
+  '/api/registros-diarios',
+  autenticar,
+  registrosDiariosRouter,
+);
+app.use(
+  '/api/ingresos',
+  autenticar,
+  autorizarRoles('SUPERADMIN', 'DUENO'),
+  ingresosRouter,
+);
+app.use(
+  '/api/mantenimientos',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  mantenimientosRouter,
+);
+app.use(
+  '/api/gastos',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  gastosRouter,
+);
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.status(200).json({
@@ -43,6 +92,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Comprueba que Node.js pueda consultar PostgreSQL mediante Prisma.
 app.get(
   '/api/health/database',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
   async (_req: Request, res: Response): Promise<void> => {
     try {
       const [pilotosRegistrados, unidadesRegistradas] = await Promise.all([

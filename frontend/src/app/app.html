@@ -1,49 +1,76 @@
-<header class="barra-superior">
-  <div class="barra-contenido">
-    <a class="marca" routerLink="/dashboard">
-      <span class="marca-icono">TX</span>
+@if (authService.autenticado()) {
+  <header class="barra-superior">
+    <div class="barra-contenido">
+      <a class="marca" routerLink="/dashboard">
+        <span class="marca-icono">TX</span>
 
-      <div>
-        <strong>Sistema de flotilla</strong>
-        <small>Control administrativo</small>
-      </div>
-    </a>
-
-    <nav class="navegacion">
-      <a routerLink="/dashboard" routerLinkActive="opcion-activa">
-        Inicio
+        <div>
+          <strong>Sistema de flotilla</strong>
+          <small>Control administrativo</small>
+        </div>
       </a>
 
-      <a routerLink="/registro-diario" routerLinkActive="opcion-activa">
-        Registro diario
-      </a>
+      <nav class="navegacion">
+        <a routerLink="/dashboard" routerLinkActive="opcion-activa">
+          Inicio
+        </a>
 
-      <a routerLink="/resumen-diario" routerLinkActive="opcion-activa">
-        Resumen diario
-      </a>
+        @if (authService.tieneRol('SUPERADMIN')) {
+          <a routerLink="/registro-diario" routerLinkActive="opcion-activa">
+            Registro diario
+          </a>
+        }
 
-      <a routerLink="/ingresos" routerLinkActive="opcion-activa">
-        Ingresos
-      </a>
+        <a routerLink="/resumen-diario" routerLinkActive="opcion-activa">
+          Resumen diario
+        </a>
 
-      <a routerLink="/pilotos" routerLinkActive="opcion-activa">
-        Pilotos
-      </a>
+        <a routerLink="/ingresos" routerLinkActive="opcion-activa">
+          Ingresos
+        </a>
 
-      <a routerLink="/unidades" routerLinkActive="opcion-activa">
-        Unidades
-      </a>
+        @if (authService.tieneRol('SUPERADMIN')) {
+          <a routerLink="/pilotos" routerLinkActive="opcion-activa">
+            Pilotos
+          </a>
 
-      <a routerLink="/mantenimientos" routerLinkActive="opcion-activa">
-        Mantenimientos
-      </a>
+          <a routerLink="/unidades" routerLinkActive="opcion-activa">
+            Unidades
+          </a>
 
-      <a routerLink="/gastos" routerLinkActive="opcion-activa">
-        Gastos
-      </a>
-    </nav>
-  </div>
-</header>
+          <a routerLink="/mantenimientos" routerLinkActive="opcion-activa">
+            Mantenimientos
+          </a>
+
+          <a routerLink="/gastos" routerLinkActive="opcion-activa">
+            Gastos
+          </a>
+
+          <a routerLink="/usuarios" routerLinkActive="opcion-activa">
+            Usuarios
+          </a>
+        }
+      </nav>
+
+      @if (authService.usuario(); as usuario) {
+        <div class="sesion-usuario">
+          <div class="datos-usuario">
+            <strong>{{ usuario.nombreCompleto }}</strong>
+            <small>{{ usuario.rol }}</small>
+          </div>
+
+          <button
+            type="button"
+            class="boton-salir"
+            (click)="cerrarSesion()"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      }
+    </div>
+  </header>
+}
 
 <main>
   <router-outlet />

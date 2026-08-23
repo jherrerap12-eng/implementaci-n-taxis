@@ -1,0 +1,171 @@
+<section class="pagina-usuarios">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Administración</span>
+      <h1>Gestión de usuarios</h1>
+      <p>Administra las cuentas de consulta para los dueños.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <button
+        type="button"
+        class="boton-secundario"
+        (click)="cargarUsuarios()"
+        [disabled]="cargando()"
+      >
+        {{ cargando() ? 'Actualizando...' : 'Actualizar listado' }}
+      </button>
+
+      <button
+        type="button"
+        class="boton-principal"
+        (click)="abrirNuevoUsuario()"
+      >
+        Nuevo usuario
+      </button>
+    </div>
+  </header>
+
+  @if (mensajeExito()) {
+    <div class="mensaje-exito">{{ mensajeExito() }}</div>
+  }
+
+  @if (mensajeError()) {
+    <div class="mensaje-error" role="alert">{{ mensajeError() }}</div>
+  }
+
+  @if (mostrarFormulario()) {
+    <section class="formulario-contenedor">
+      <div class="formulario-encabezado">
+        <div>
+          <h2>{{ usuarioEditandoId() === null ? 'Nuevo usuario' : 'Editar usuario' }}</h2>
+          <p>Las cuentas creadas desde esta pantalla tienen rol DUENO.</p>
+        </div>
+
+        <button type="button" class="boton-cerrar" (click)="cerrarFormulario()">×</button>
+      </div>
+
+      <form [formGroup]="formularioUsuario" (ngSubmit)="guardarUsuario()">
+        <div class="campos">
+          <div class="campo">
+            <label for="nombreCompleto">Nombre completo *</label>
+            <input id="nombreCompleto" type="text" formControlName="nombreCompleto" />
+            @if (formularioUsuario.controls.nombreCompleto.touched && formularioUsuario.controls.nombreCompleto.invalid) {
+              <small>Ingresa un nombre válido.</small>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="correo">Correo *</label>
+            <input id="correo" type="email" formControlName="correo" autocomplete="username" />
+            @if (formularioUsuario.controls.correo.touched && formularioUsuario.controls.correo.invalid) {
+              <small>Ingresa un correo válido.</small>
+            }
+          </div>
+
+          @if (usuarioEditandoId() === null) {
+            <div class="campo">
+              <label for="contrasena">Contraseña *</label>
+              <input id="contrasena" type="password" formControlName="contrasena" autocomplete="new-password" />
+              @if (formularioUsuario.controls.contrasena.touched && formularioUsuario.controls.contrasena.invalid) {
+                <small>Debe tener al menos 12 caracteres.</small>
+              }
+            </div>
+          }
+
+          <div class="campo">
+            <label for="rol">Rol</label>
+            <select id="rol" formControlName="rol">
+              <option value="DUENO">DUENO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="acciones-formulario">
+          <button type="button" class="boton-cancelar" (click)="cerrarFormulario()" [disabled]="guardando()">Cancelar</button>
+          <button type="submit" class="boton-principal" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar usuario' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (usuarioContrasena(); as usuario) {
+    <section class="formulario-contenedor formulario-contrasena">
+      <div class="formulario-encabezado">
+        <div>
+          <h2>Restablecer contraseña</h2>
+          <p>{{ usuario.nombreCompleto }} · {{ usuario.correo }}</p>
+        </div>
+        <button type="button" class="boton-cerrar" (click)="cerrarContrasena()">×</button>
+      </div>
+
+      <form [formGroup]="formularioContrasena" (ngSubmit)="guardarContrasena()">
+        <div class="campo">
+          <label for="nuevaContrasena">Nueva contraseña *</label>
+          <input id="nuevaContrasena" type="password" formControlName="nuevaContrasena" autocomplete="new-password" />
+          @if (formularioContrasena.controls.nuevaContrasena.touched && formularioContrasena.controls.nuevaContrasena.invalid) {
+            <small>Debe tener al menos 12 caracteres.</small>
+          }
+        </div>
+
+        <div class="acciones-formulario">
+          <button type="button" class="boton-cancelar" (click)="cerrarContrasena()" [disabled]="guardando()">Cancelar</button>
+          <button type="submit" class="boton-principal" [disabled]="guardando()">
+            {{ guardando() ? 'Actualizando...' : 'Guardar contraseña' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">Cargando usuarios...</div>
+  } @else {
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre completo</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Último acceso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of usuarios(); track usuario.id) {
+            <tr>
+              <td>{{ usuario.nombreCompleto }}</td>
+              <td>{{ usuario.correo }}</td>
+              <td><span class="rol">{{ usuario.rol }}</span></td>
+              <td>
+                <span class="estado" [class.estado-inactivo]="!usuario.activo">
+                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>{{ formatearFecha(usuario.ultimoAccesoEn) }}</td>
+              <td>
+                @if (usuario.rol === 'DUENO') {
+                  <div class="acciones-tabla">
+                    <button type="button" class="boton-tabla" (click)="editarUsuario(usuario)">Editar</button>
+                    <button type="button" class="boton-tabla" (click)="abrirContrasena(usuario)">Contraseña</button>
+                    <button type="button" class="boton-tabla boton-estado" (click)="cambiarEstado(usuario)" [disabled]="procesandoId() === usuario.id">
+                      {{ usuario.activo ? 'Inactivar' : 'Activar' }}
+                    </button>
+                  </div>
+                } @else {
+                  <span class="sin-acciones">Cuenta principal</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="sin-registros">No hay usuarios registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,16 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 
 import {
-  IngresosService,
-  ResumenIngresos,
-} from '../../services/ingresos';
-
-import {
-  Unidad,
-  UnidadesService,
-} from '../../services/unidades';
+  AlertaMantenimientoDashboard,
+  DashboardService,
+  ResumenDashboard,
+} from '../../services/dashboard';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,13 +14,14 @@ import {
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
-  private readonly ingresosService = inject(IngresosService);
-  private readonly unidadesService = inject(UnidadesService);
+  private readonly dashboardService = inject(DashboardService);
 
-  readonly resumen = signal<ResumenIngresos | null>(null);
+  readonly resumen = signal<ResumenDashboard | null>(null);
 
-  readonly mantenimientosRequeridos = signal<Unidad[]>([]);
-  readonly proximosMantenimientos = signal<Unidad[]>([]);
+  readonly mantenimientosRequeridos =
+    signal<AlertaMantenimientoDashboard[]>([]);
+  readonly proximosMantenimientos =
+    signal<AlertaMantenimientoDashboard[]>([]);
 
   readonly cargando = signal(false);
   readonly mensajeError = signal('');
@@ -40,22 +36,14 @@ export class Dashboard implements OnInit {
     this.cargando.set(true);
     this.mensajeError.set('');
 
-    forkJoin({
-      ingresos: this.ingresosService.obtenerIngresos(
-        1,
-        this.fechaActual,
-      ),
-
-      unidades:
-        this.unidadesService.obtenerUnidades(),
-    }).subscribe({
+    this.dashboardService.obtenerDashboard().subscribe({
       next: (respuesta) => {
-        this.resumen.set(
-          respuesta.ingresos.data,
+        this.resumen.set(respuesta.data);
+        this.mantenimientosRequeridos.set(
+          respuesta.data.alertasMantenimiento.requeridas,
         );
-
-        this.clasificarMantenimientos(
-          respuesta.unidades.data,
+        this.proximosMantenimientos.set(
+          respuesta.data.alertasMantenimiento.proximas,
         );
 
         this.cargando.set(false);
@@ -79,44 +67,6 @@ export class Dashboard implements OnInit {
         this.cargando.set(false);
       },
     });
-  }
-
-  private clasificarMantenimientos(
-    unidades: Unidad[],
-  ): void {
-    const requeridos = unidades.filter(
-      (unidad) =>
-        unidad.proximoMantenimientoKm !== null &&
-        unidad.kilometrajeActual >=
-          unidad.proximoMantenimientoKm,
-    );
-
-    const proximos = unidades.filter(
-      (unidad) => {
-        if (
-          unidad.proximoMantenimientoKm === null
-        ) {
-          return false;
-        }
-
-        const kilometrosRestantes =
-          unidad.proximoMantenimientoKm -
-          unidad.kilometrajeActual;
-
-        return (
-          kilometrosRestantes > 0 &&
-          kilometrosRestantes <= 500
-        );
-      },
-    );
-
-    this.mantenimientosRequeridos.set(
-      requeridos,
-    );
-
-    this.proximosMantenimientos.set(
-      proximos,
-    );
   }
 
   private obtenerFechaActual(): string {

@@ -84,7 +84,7 @@ model RegistroDiario {
 
   piloto            Piloto             @relation(fields: [pilotoId], references: [id])
   unidad            Unidad             @relation(fields: [unidadId], references: [id])
-  cargasCombustible CargaCombustible[]
+  cargaCombustible CargaCombustible?
 
   @@unique([pilotoId, fecha], map: "uq_registros_diarios_piloto_fecha")
   @@unique([unidadId, fecha], map: "uq_registros_diarios_unidad_fecha")
@@ -96,7 +96,7 @@ model RegistroDiario {
 
 model CargaCombustible {
   id               Int      @id @default(autoincrement())
-  registroDiarioId Int      @map("registro_diario_id")
+  registroDiarioId Int      @unique(map: "uq_cargas_combustible_registro_diario") @map("registro_diario_id")
   monto            Decimal  @db.Decimal(12, 2)
   galones          Decimal  @db.Decimal(10, 3)
   precioGalon      Decimal  @map("precio_galon") @db.Decimal(10, 2)
@@ -104,7 +104,6 @@ model CargaCombustible {
 
   registroDiario RegistroDiario @relation(fields: [registroDiarioId], references: [id], onDelete: Cascade)
 
-  @@index([registroDiarioId])
   @@map("cargas_combustible")
 }
 
@@ -135,6 +134,28 @@ enum TipoGasto {
   REPUESTOS_MENORES
   PINCHAZO
 }
+
+enum RolUsuario {
+  SUPERADMIN
+  DUENO
+}
+
+model Usuario {
+  id             Int        @id @default(autoincrement())
+  nombreCompleto String     @map("nombre_completo") @db.VarChar(150)
+  correo         String     @unique @db.VarChar(150)
+  contrasenaHash String     @map("contrasena_hash") @db.VarChar(255)
+  rol            RolUsuario
+  activo         Boolean    @default(true)
+  ultimoAccesoEn DateTime?  @map("ultimo_acceso_en")
+  creadoEn       DateTime   @default(now()) @map("creado_en")
+  actualizadoEn  DateTime   @updatedAt @map("actualizado_en")
+
+  @@index([rol])
+  @@index([activo])
+  @@map("usuarios")
+}
+
 model Gasto {
   id          Int       @id @default(autoincrement())
   unidadId    Int       @map("unidad_id")
