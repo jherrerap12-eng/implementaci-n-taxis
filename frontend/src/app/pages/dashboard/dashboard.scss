@@ -487,24 +487,6 @@ tbody tr:last-child td {
     color: #64748b;
     text-align: center;
 }
-    .resumen-alertas {
-        grid-template-columns: 1fr;
-        padding: 16px;
-    }
-
-    .alerta-unidad {
-        grid-template-columns: 1fr;
-        gap: 14px;
-        padding: 18px;
-    }
-
-    .alerta-kilometraje {
-        min-width: 0;
-    }
-
-    .alerta-unidad > a {
-        width: fit-content;
-    }
 
 @media (max-width: 950px) {
     .tarjetas-resumen {
@@ -547,5 +529,130 @@ tbody tr:last-child td {
 
     h1 {
         font-size: 26px;
+    }
+}
+
+@media (max-width: 600px) {
+    .tarjeta {
+        min-height: 112px;
+        padding: 18px;
+    }
+
+    .accesos-grid {
+        padding: 16px;
+    }
+
+    .acceso {
+        min-height: 88px;
+        padding: 16px;
+    }
+
+    .titulo-seccion > a {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+    }
+
+    .actividad-unidades .tabla-contenedor {
+        overflow: visible;
+        padding: 14px;
+        background: #f8fafc;
+    }
+
+    .actividad-unidades table,
+    .actividad-unidades tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .actividad-unidades thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .actividad-unidades tbody {
+        display: grid;
+        gap: 14px;
+    }
+
+    .actividad-unidades tbody tr {
+        display: grid;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        box-shadow: 0 3px 10px rgb(15 23 42 / 5%);
+    }
+
+    .actividad-unidades tbody td {
+        display: grid;
+        grid-template-columns: minmax(88px, 34%) minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        padding: 11px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .actividad-unidades tbody td::before {
+        content: attr(data-label);
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .actividad-unidades tbody td:first-child {
+        grid-template-columns: 1fr;
+        padding: 15px 14px;
+        background: #eff6ff;
+        color: #1e293b;
+        font-size: 17px;
+    }
+
+    .actividad-unidades tbody td:first-child::before {
+        margin-bottom: -8px;
+        color: #2563eb;
+    }
+
+    .actividad-unidades tbody td:last-child {
+        border-bottom: 0;
+    }
+
+    .resumen-alertas {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .alerta-unidad {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .alerta-kilometraje {
+        min-width: 0;
+    }
+
+    .alerta-unidad > a {
+        display: inline-flex;
+        min-height: 44px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+    }
+
+    .mensaje-error button {
+        min-height: 44px;
+        width: 100%;
     }
 }

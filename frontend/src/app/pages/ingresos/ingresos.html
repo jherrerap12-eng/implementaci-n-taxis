@@ -265,27 +265,27 @@
               <tbody>
                 @for (dia of datos.porDia; track dia.fecha) {
                   <tr>
-                    <td>
+                    <td data-label="Fecha">
                       <strong>{{ dia.fecha }}</strong>
                     </td>
 
-                    <td>{{ dia.operaciones }}</td>
+                    <td data-label="Operaciones">{{ dia.operaciones }}</td>
 
-                    <td>
+                    <td data-label="Kilómetros">
                       {{ dia.kilometrosRecorridos }} km
                     </td>
 
-                    <td>
+                    <td data-label="Ingresos">
                       <strong>
                         Q {{ dia.montoLiquidado.toFixed(2) }}
                       </strong>
                     </td>
 
-                    <td>
+                    <td data-label="Combustible">
                       Q {{ dia.montoCombustible.toFixed(2) }}
                     </td>
 
-                    <td>
+                    <td data-label="Galones">
                       {{ dia.galones.toFixed(3) }}
                     </td>
                   </tr>
@@ -342,31 +342,36 @@
                   track unidad.unidadId
                 ) {
                   <tr>
-                    <td>
+                    <td class="periodo-registro-movil" data-label="Período">
+                      {{ datos.periodo.fechaInicio }} al
+                      {{ datos.periodo.fechaFin }}
+                    </td>
+
+                    <td data-label="Unidad">
                       <strong>
                         {{ unidad.numeroUnidad }}
                       </strong>
                     </td>
 
-                    <td>{{ unidad.placa }}</td>
+                    <td data-label="Placa">{{ unidad.placa }}</td>
 
-                    <td>{{ unidad.operaciones }}</td>
+                    <td data-label="Operaciones">{{ unidad.operaciones }}</td>
 
-                    <td>
+                    <td data-label="Kilómetros">
                       {{ unidad.kilometrosRecorridos }} km
                     </td>
 
-                    <td>
+                    <td data-label="Ingresos">
                       <strong>
                         Q {{ unidad.montoLiquidado.toFixed(2) }}
                       </strong>
                     </td>
 
-                    <td>
+                    <td data-label="Combustible">
                       Q {{ unidad.montoCombustible.toFixed(2) }}
                     </td>
 
-                    <td>
+                    <td data-label="Galones">
                       {{ unidad.galones.toFixed(3) }}
                     </td>
                   </tr>
@@ -423,31 +428,36 @@
                   track piloto.pilotoId
                 ) {
                   <tr>
-                    <td>
+                    <td class="periodo-registro-movil" data-label="Período">
+                      {{ datos.periodo.fechaInicio }} al
+                      {{ datos.periodo.fechaFin }}
+                    </td>
+
+                    <td data-label="Piloto">
                       <strong>
                         {{ piloto.nombreCompleto }}
                       </strong>
                     </td>
 
-                    <td>{{ piloto.codigo }}</td>
+                    <td data-label="Código">{{ piloto.codigo }}</td>
 
-                    <td>{{ piloto.operaciones }}</td>
+                    <td data-label="Operaciones">{{ piloto.operaciones }}</td>
 
-                    <td>
+                    <td data-label="Kilómetros">
                       {{ piloto.kilometrosRecorridos }} km
                     </td>
 
-                    <td>
+                    <td data-label="Ingresos">
                       <strong>
                         Q {{ piloto.montoLiquidado.toFixed(2) }}
                       </strong>
                     </td>
 
-                    <td>
+                    <td data-label="Combustible">
                       Q {{ piloto.montoCombustible.toFixed(2) }}
                     </td>
 
-                    <td>
+                    <td data-label="Galones">
                       {{ piloto.galones.toFixed(3) }}
                     </td>
                   </tr>

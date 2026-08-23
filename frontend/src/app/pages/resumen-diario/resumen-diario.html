@@ -134,7 +134,11 @@
                   track registro.id
                 ) {
                   <tr>
-                    <td>
+                    <td class="fecha-registro-movil" data-label="Fecha">
+                      {{ datos.fecha }}
+                    </td>
+
+                    <td data-label="Piloto">
                       <div class="dato-principal">
                         <strong>
                           {{ registro.piloto.nombreCompleto }}
@@ -146,7 +150,7 @@
                       </div>
                     </td>
 
-                    <td>
+                    <td class="unidad-registro" data-label="Unidad">
                       <div class="dato-principal">
                         <strong>
                           {{ registro.unidad.numeroUnidad }}
@@ -158,27 +162,27 @@
                       </div>
                     </td>
 
-                    <td>
+                    <td data-label="Km inicial">
                       {{ registro.kilometrajeInicial }} km
                     </td>
 
-                    <td>
+                    <td data-label="Km final">
                       {{ registro.kilometrajeFinal }} km
                     </td>
 
-                    <td>
+                    <td data-label="Recorrido">
                       <strong>
                         {{ obtenerKilometrosRecorridos(registro) }} km
                       </strong>
                     </td>
 
-                    <td>
+                    <td data-label="Monto liquidado">
                       <strong>
                         Q {{ registro.montoLiquidado }}
                       </strong>
                     </td>
 
-                    <td>
+                    <td data-label="Combustible">
                       @if (tieneCombustible(registro)) {
                         <strong>
                           Q
@@ -193,7 +197,7 @@
                       }
                     </td>
 
-                    <td>
+                    <td data-label="Galones">
                       @if (tieneCombustible(registro)) {
                         {{
                           obtenerGalones(registro).toFixed(3)
@@ -203,7 +207,7 @@
                       }
                     </td>
 
-                    <td>
+                    <td data-label="Estado">
                       <span
                         class="estado"
                         [class.estado-pendiente]="
@@ -214,7 +218,7 @@
                         {{ registro.estado.replaceAll('_', ' ') }}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Acciones">
   @if (registro.estado === 'PENDIENTE_COMBUSTIBLE') {
     <button
       type="button"

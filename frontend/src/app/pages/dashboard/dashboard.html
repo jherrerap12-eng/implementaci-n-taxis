@@ -292,25 +292,25 @@
                   track unidad.unidadId
                 ) {
                   <tr>
-                    <td>
+                    <td data-label="Unidad">
                       <strong>
                         {{ unidad.numeroUnidad }}
                       </strong>
                     </td>
 
-                    <td>{{ unidad.placa }}</td>
+                    <td data-label="Placa">{{ unidad.placa }}</td>
 
-                    <td>{{ unidad.operaciones }}</td>
+                    <td data-label="Operaciones">{{ unidad.operaciones }}</td>
 
-                    <td>
+                    <td data-label="Kilómetros">
                       {{ unidad.kilometrosRecorridos }} km
                     </td>
 
-                    <td>
+                    <td data-label="Monto liquidado">
                       Q {{ unidad.montoLiquidado.toFixed(2) }}
                     </td>
 
-                    <td>
+                    <td data-label="Combustible">
                       Q {{ unidad.montoCombustible.toFixed(2) }}
                     </td>
                   </tr>

@@ -502,3 +502,70 @@ p {
     width: 100%;
   }
 }
+
+@media (max-width: 600px) {
+  .formulario-contenedor,
+  .registro-confirmado {
+    min-width: 0;
+    padding: 18px;
+  }
+
+  .pasos {
+    padding: 16px;
+  }
+
+  .paso,
+  .paso > div,
+  .confirmacion-contenido,
+  .campo,
+  .campo-moneda {
+    min-width: 0;
+  }
+
+  .paso strong,
+  .paso small,
+  .confirmacion-contenido h2,
+  .confirmacion-contenido p,
+  .resumen-registro strong,
+  .mensaje-exito,
+  .mensaje-error,
+  .aviso-sin-combustible {
+    overflow-wrap: anywhere;
+  }
+
+  .campo input,
+  .campo select,
+  .campo textarea,
+  .campo-moneda input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .campo input,
+  .campo select,
+  .campo-moneda {
+    min-height: 44px;
+  }
+
+  .boton-principal,
+  .boton-secundario {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .opcion-sin-combustible {
+    min-height: 52px;
+    padding: 14px;
+  }
+
+  .opcion-sin-combustible input {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+  }
+
+  .estado-carga {
+    padding: 24px 18px;
+    overflow-wrap: anywhere;
+  }
+}

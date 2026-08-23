@@ -444,6 +444,121 @@ tbody tr:last-child td {
   }
 }
 
+@media (max-width: 600px) {
+  .tabla-contenedor {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  table,
+  tbody {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  tbody {
+    display: grid;
+    gap: 14px;
+  }
+
+  tbody tr {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+  }
+
+  tbody tr:hover {
+    background: white;
+  }
+
+  tbody td {
+    display: grid;
+    grid-template-columns: minmax(88px, 34%) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 11px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  tbody td:first-child {
+    grid-template-columns: 1fr;
+    padding: 15px 14px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 18px;
+  }
+
+  tbody td:first-child::before {
+    margin-bottom: -8px;
+    color: #2563eb;
+  }
+
+  tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .mantenimiento-sin-plan,
+  .mantenimiento-proximo,
+  .mantenimiento-vencido,
+  .mantenimiento-correcto {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .acciones-tabla {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .boton-editar,
+  .selector-estado {
+    min-width: 0;
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .fila-vacia td {
+    display: block;
+    padding: 24px 14px;
+    background: white;
+    font-size: 14px;
+  }
+
+  .fila-vacia td::before {
+    content: none;
+  }
+}
+
 @media (max-width: 700px) {
   .pagina-unidades {
     padding: 24px 14px;
@@ -530,5 +645,21 @@ tbody tr:last-child td {
     font-size: 12px;
     font-weight: 600;
     color: #6b7280;
+  }
+}
+
+@media (max-width: 600px) {
+  .acciones-tabla {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .boton-editar,
+  .selector-estado {
+    min-width: 0;
+    min-height: 44px;
+    width: 100%;
   }
 }

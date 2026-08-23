@@ -37,3 +37,122 @@ td { font-size: 14px; } tbody tr:last-child td { border-bottom: 0; }
 .boton-estado { background: #fef3c7; color: #92400e; }
 .sin-acciones, .sin-registros { color: #64748b; } .sin-registros, .estado-carga { text-align: center; }
 @media (max-width: 700px) { .pagina-usuarios { padding: 24px 14px; } .encabezado { align-items: stretch; flex-direction: column; } .acciones-encabezado { flex-direction: column; } .acciones-encabezado button { width: 100%; } .campos { grid-template-columns: 1fr; } h1 { font-size: 26px; } }
+
+@media (max-width: 600px) {
+  .tabla-contenedor {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  table,
+  tbody {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  tbody {
+    display: grid;
+    gap: 14px;
+  }
+
+  tbody tr {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 14px rgb(15 23 42 / 6%);
+  }
+
+  tbody td {
+    display: grid;
+    grid-template-columns: minmax(90px, 34%) minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 11px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  tbody td:first-child {
+    grid-template-columns: 1fr;
+    padding: 15px 14px;
+    background: #f8fafc;
+    color: #1e293b;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  tbody td:first-child::before {
+    margin-bottom: -8px;
+    color: #2563eb;
+  }
+
+  tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .acciones-tabla {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .boton-tabla {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .sin-acciones {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .acciones-formulario {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .acciones-formulario button {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .fila-vacia td {
+    display: block;
+    padding: 24px 14px;
+    background: white;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .fila-vacia td::before {
+    content: none;
+  }
+}

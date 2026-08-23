@@ -169,7 +169,7 @@
                 track mantenimiento.id
               ) {
                 <tr>
-                  <td>
+                  <td data-label="Unidad">
                     <strong>
                       {{ mantenimiento.unidad.numeroUnidad }}
                     </strong>
@@ -179,11 +179,11 @@
                     </small>
                   </td>
 
-                  <td>
+                  <td data-label="Fecha de inicio">
                     {{ mantenimiento.fechaInicio.slice(0, 10) }}
                   </td>
 
-                  <td>
+                  <td data-label="Fecha de finalización">
                     {{
                       mantenimiento.fechaFin
                         ? mantenimiento.fechaFin.slice(0, 10)
@@ -191,19 +191,23 @@
                     }}
                   </td>
 
-                  <td>
+                  <td class="tipo-mantenimiento-movil" data-label="Tipo">
+                    Mantenimiento
+                  </td>
+
+                  <td data-label="Kilometraje">
                     {{ mantenimiento.kilometraje }} km
                   </td>
 
-                  <td class="descripcion-tabla">
+                  <td class="descripcion-tabla" data-label="Descripción">
                     {{ mantenimiento.descripcion }}
                   </td>
 
-                  <td>
+                  <td data-label="Costo">
                 Q {{ formatearCosto(mantenimiento.costo) }}
                   </td>
 
-                  <td>
+                  <td data-label="Estado">
                     <span
                       class="estado"
                       [class.estado-activo]="
@@ -221,7 +225,7 @@
                     </span>
                   </td>
 
-                  <td>
+                  <td data-label="Acciones">
                     @if (
                       mantenimiento.estado === 'EN_PROCESO'
                     ) {

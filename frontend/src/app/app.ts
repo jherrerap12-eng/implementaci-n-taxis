@@ -1,6 +1,7 @@
 import {
   Component,
   inject,
+  signal,
 } from '@angular/core';
 import {
   Router,
@@ -24,8 +25,18 @@ import { AuthService } from './services/auth';
 export class App {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly menuAbierto = signal(false);
+
+  alternarMenu(): void {
+    this.menuAbierto.update((abierto) => !abierto);
+  }
+
+  cerrarMenu(): void {
+    this.menuAbierto.set(false);
+  }
 
   cerrarSesion(): void {
+    this.cerrarMenu();
     this.authService.cerrarSesion();
     void this.router.navigateByUrl('/login');
   }

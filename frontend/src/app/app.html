@@ -10,43 +10,62 @@
         </div>
       </a>
 
-      <nav class="navegacion">
-        <a routerLink="/dashboard" routerLinkActive="opcion-activa">
+      <button
+        type="button"
+        class="boton-menu"
+        aria-label="Abrir o cerrar menú principal"
+        aria-controls="menu-principal"
+        [attr.aria-expanded]="menuAbierto()"
+        (click)="alternarMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div
+        id="menu-principal"
+        class="menu-principal"
+        [class.menu-abierto]="menuAbierto()"
+      >
+
+      <nav class="navegacion" aria-label="Navegación principal">
+        <a routerLink="/dashboard" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
           Inicio
         </a>
 
         @if (authService.tieneRol('SUPERADMIN')) {
-          <a routerLink="/registro-diario" routerLinkActive="opcion-activa">
+          <a routerLink="/registro-diario" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Registro diario
           </a>
         }
 
-        <a routerLink="/resumen-diario" routerLinkActive="opcion-activa">
+        <a routerLink="/resumen-diario" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
           Resumen diario
         </a>
 
-        <a routerLink="/ingresos" routerLinkActive="opcion-activa">
+        <a routerLink="/ingresos" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
           Ingresos
         </a>
 
         @if (authService.tieneRol('SUPERADMIN')) {
-          <a routerLink="/pilotos" routerLinkActive="opcion-activa">
+          <a routerLink="/pilotos" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Pilotos
           </a>
 
-          <a routerLink="/unidades" routerLinkActive="opcion-activa">
+          <a routerLink="/unidades" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Unidades
           </a>
 
-          <a routerLink="/mantenimientos" routerLinkActive="opcion-activa">
+          <a routerLink="/mantenimientos" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Mantenimientos
           </a>
 
-          <a routerLink="/gastos" routerLinkActive="opcion-activa">
+          <a routerLink="/gastos" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Gastos
           </a>
 
-          <a routerLink="/usuarios" routerLinkActive="opcion-activa">
+          <a routerLink="/usuarios" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Usuarios
           </a>
         }
@@ -68,6 +87,7 @@
           </button>
         </div>
       }
+      </div>
     </div>
   </header>
 }

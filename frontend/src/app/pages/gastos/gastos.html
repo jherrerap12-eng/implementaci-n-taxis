@@ -208,11 +208,11 @@
             <tbody>
               @for (gasto of gastos(); track gasto.id) {
                 <tr>
-                  <td>
+                  <td data-label="Fecha">
                     {{ gasto.fecha.slice(0, 10) }}
                   </td>
 
-                  <td>
+                  <td class="unidad-gasto" data-label="Unidad">
                     <strong>
                       {{ gasto.unidad.numeroUnidad }}
                     </strong>
@@ -222,7 +222,7 @@
                     </small>
                   </td>
 
-                  <td>
+                  <td data-label="Categoría">
                     <span
                       class="tipo-gasto"
                       [class.tipo-pinchazo]="
@@ -233,14 +233,14 @@
                     </span>
                   </td>
 
-                  <td>
+                  <td data-label="Descripción">
                     {{
                       gasto.descripcion ||
                         'Sin descripción'
                     }}
                   </td>
 
-                  <td>
+                  <td data-label="Monto">
                     <strong>
                       Q {{ formatearMonto(gasto.monto) }}
                     </strong>

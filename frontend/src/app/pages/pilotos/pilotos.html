@@ -231,23 +231,23 @@
         <tbody>
           @for (piloto of pilotos(); track piloto.id) {
             <tr>
-              <td>
+              <td class="codigo-piloto" data-label="Código">
                 <strong>{{ piloto.codigo }}</strong>
               </td>
 
-              <td>{{ piloto.nombreCompleto }}</td>
+              <td class="nombre-piloto" data-label="Nombre completo">{{ piloto.nombreCompleto }}</td>
 
-              <td>
+              <td data-label="Teléfono">
                 {{ piloto.telefono || 'No registrado' }}
               </td>
 
-              <td>{{ piloto.numeroLicencia }}</td>
+              <td data-label="Licencia">{{ piloto.numeroLicencia }}</td>
 
-              <td>
+              <td data-label="Vencimiento">
                 {{ piloto.vencimientoLicencia.slice(0, 10) }}
               </td>
 
-              <td>
+              <td data-label="Estado">
                 <span
                   class="estado"
                   [class.estado-inactivo]="
@@ -258,7 +258,7 @@
                 </span>
               </td>
 
-              <td>
+              <td data-label="Acciones">
                 <div class="acciones-tabla">
                   <button
                     type="button"
@@ -301,7 +301,7 @@
               </td>
             </tr>
           } @empty {
-            <tr>
+            <tr class="fila-vacia">
               <td colspan="7" class="sin-registros">
                 No hay pilotos registrados.
               </td>

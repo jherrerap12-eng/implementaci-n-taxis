@@ -275,26 +275,26 @@
       <tbody>
         @for (unidad of unidades(); track unidad.id) {
         <tr>
-          <td>
+          <td data-label="Unidad">
             <strong>
               {{ unidad.numeroUnidad }}
             </strong>
           </td>
 
-          <td>
+          <td data-label="Placa">
             {{ unidad.placa }}
           </td>
 
-          <td>
+          <td data-label="Vehículo">
             {{ unidad.marca }}
             {{ unidad.modelo }}
           </td>
 
-          <td>
+          <td data-label="Año">
             {{ unidad.anio }}
           </td>
 
-          <td>
+          <td data-label="Combustible">
             {{
             unidad.tipoCombustible === 'DIESEL'
             ? 'Diésel'
@@ -302,10 +302,10 @@
             }}
           </td>
 
-          <td>
+          <td data-label="Kilometraje">
             {{ unidad.kilometrajeActual }} km
           </td>
-          <td>
+          <td data-label="Mantenimiento">
             @if (
             unidad.intervaloMantenimientoKm === null ||
             unidad.proximoMantenimientoKm === null
@@ -357,7 +357,7 @@
   </div>
   }
   </td>
-  <td>
+  <td data-label="Estado">
     <span class="estado" [class.estado-no-disponible]="
                     unidad.estado !== 'DISPONIBLE'
                   ">
@@ -365,7 +365,7 @@
     </span>
   </td>
 
-  <td>
+  <td data-label="Acciones">
     <div class="acciones-tabla">
       <button type="button" class="boton-editar" (click)="editarUnidad(unidad)" [disabled]="
                       cambiandoEstadoId() === unidad.id
@@ -410,7 +410,7 @@
   </td>
   </tr>
   } @empty {
-  <tr>
+  <tr class="fila-vacia">
     <td colspan="9" class="sin-registros">
       No hay unidades registradas.
     </td>
