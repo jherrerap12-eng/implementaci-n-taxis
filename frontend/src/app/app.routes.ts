@@ -18,6 +18,8 @@ import { RegistroDiarioComponent } from './pages/registro-diario/registro-diario
 import { ResumenDiarioComponent } from './pages/resumen-diario/resumen-diario';
 import { Unidades } from './pages/unidades/unidades';
 import { Usuarios } from './pages/usuarios/usuarios';
+import { CatalogoComponentes } from './pages/catalogo-componentes/catalogo-componentes';
+import { ComponentesUnidad } from './pages/componentes-unidad/componentes-unidad';
 import { AuthService } from './services/auth';
 
 const redireccionInicial: RedirectFunction = () => {
@@ -124,6 +126,24 @@ export const routes: Routes = [
       roles: ['SUPERADMIN'],
     },
     title: 'Usuarios | Sistema de flotilla',
+  },
+  {
+    path: 'catalogo-componentes',
+    component: CatalogoComponentes,
+    canActivate: [authGuard],
+    data: {
+      roles: ['SUPERADMIN'],
+    },
+    title: 'Catálogo de componentes | Sistema de flotilla',
+  },
+  {
+    path: 'componentes-unidad',
+    component: ComponentesUnidad,
+    canActivate: [authGuard],
+    data: {
+      roles: ['SUPERADMIN'],
+    },
+    title: 'Componentes instalados | Sistema de flotilla',
   },
   {
     path: '',

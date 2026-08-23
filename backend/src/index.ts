@@ -15,6 +15,9 @@ import { mantenimientosRouter } from './routes/mantenimientos.routes.js';
 import { gastosRouter } from './routes/gastos.routes.js';
 import { usuariosRouter } from './routes/usuarios.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
+import { componentesRouter } from './routes/componentes.routes.js';
+import { catalogoComponentesRouter } from './routes/catalogo-componentes.routes.js';
+import { componentesUnidadRouter } from './routes/componentes-unidad.routes.js';
 
 dotenv.config();
 
@@ -35,6 +38,24 @@ app.use(
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+app.use(
+  '/api/componentes-unidad',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  componentesUnidadRouter,
+);
+app.use(
+  '/api/catalogo-componentes',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  catalogoComponentesRouter,
+);
+app.use(
+  '/api/componentes',
+  autenticar,
+  autorizarRoles('SUPERADMIN', 'DUENO'),
+  componentesRouter,
+);
 app.use(
   '/api/dashboard',
   autenticar,

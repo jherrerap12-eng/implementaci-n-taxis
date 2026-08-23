@@ -1,0 +1,192 @@
+<section class="pagina-componentes">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Mantenimiento preventivo</span>
+      <h1>Componentes instalados</h1>
+      <p>Administra los componentes activos y conserva su historial de retiro.</p>
+    </div>
+    <div class="acciones-encabezado">
+      <button type="button" class="boton-secundario" (click)="cargarDatos()" [disabled]="cargando()">Actualizar</button>
+      <button type="button" class="boton-principal" (click)="abrirInstalacion()">Instalar componente</button>
+    </div>
+  </header>
+
+  @if (mensajeExito()) { <div class="mensaje-exito">{{ mensajeExito() }}</div> }
+  @if (mensajeError()) { <div class="mensaje-error" role="alert">{{ mensajeError() }}</div> }
+
+  @if (mostrarInstalacion()) {
+    <section class="formulario-contenedor">
+      <div class="formulario-encabezado">
+        <div><h2>Nueva instalación</h2><p>Los valores personalizados son opcionales; en blanco se usarán los del catálogo.</p></div>
+        <button type="button" class="boton-cerrar" aria-label="Cerrar formulario" (click)="mostrarInstalacion.set(false)">×</button>
+      </div>
+      <form [formGroup]="formularioInstalacion" (ngSubmit)="guardarInstalacion()">
+        <div class="campos">
+          <div class="campo"><label for="unidad">Unidad *</label><select id="unidad" formControlName="unidadId" (change)="seleccionarUnidad()"><option [ngValue]="null">Selecciona</option>@for (unidad of unidades(); track unidad.id) {<option [ngValue]="unidad.id">{{ unidad.numeroUnidad }} · {{ unidad.placa }}</option>}</select></div>
+          <div class="campo"><label for="catalogo">Componente *</label><select id="catalogo" formControlName="catalogoComponenteId" (change)="seleccionarCatalogo()"><option [ngValue]="null">Selecciona</option>@for (item of catalogo(); track item.id) {<option [ngValue]="item.id">{{ item.nombre }} · {{ item.modoInstalacion }}</option>}</select></div>
+          <div class="campo"><label for="marca">Marca *</label><input id="marca" formControlName="marca" /></div>
+          <div class="campo"><label for="modelo">Modelo *</label><input id="modelo" formControlName="modelo" /></div>
+          @if (catalogoSeleccionado()?.modoInstalacion !== 'POSICIONADO') {
+            <div class="campo"><label for="serie">Número de serie</label><input id="serie" formControlName="numeroSerie" /></div>
+            <div class="campo"><label for="cantidad">Cantidad *</label><input id="cantidad" type="number" min="1" step="1" formControlName="cantidad" /></div>
+          }
+          <div class="campo"><label for="fechaInstalacion">Fecha de instalación *</label><input id="fechaInstalacion" type="date" [max]="fechaActual" formControlName="fechaInstalacion" /></div>
+          <div class="campo"><label for="kmInstalacion">Kilometraje de instalación *</label><input id="kmInstalacion" type="number" min="0" step="1" formControlName="kilometrajeInstalacion" /></div>
+          <div class="campo"><label for="vidaMeses">Vida útil personalizada (meses)</label><input id="vidaMeses" type="number" min="1" step="1" formControlName="vidaUtilMeses" /></div>
+          <div class="campo"><label for="vidaKm">Vida útil personalizada (km)</label><input id="vidaKm" type="number" min="1" step="1" formControlName="vidaUtilKm" /></div>
+          <div class="campo"><label for="alertaDias">Umbral personalizado (días)</label><input id="alertaDias" type="number" min="0" step="1" formControlName="alertaDiasAntes" /></div>
+          <div class="campo"><label for="alertaKm">Umbral personalizado (km)</label><input id="alertaKm" type="number" min="0" step="1" formControlName="alertaKmAntes" /></div>
+        </div>
+
+        @if (catalogoSeleccionado(); as componenteCatalogo) {
+          @if (componenteCatalogo.modoInstalacion === 'POSICIONADO') {
+            <section class="selector-posiciones">
+              <div>
+                <h3>Selecciona las posiciones</h3>
+                <p>Se creará un componente independiente por cada posición.</p>
+              </div>
+              <div class="posiciones-grid">
+                @for (posicion of componenteCatalogo.posiciones; track posicion.id) {
+                  @if (posicion.activo) {
+                    <label class="opcion-posicion" [class.posicion-ocupada]="posicionOcupada(posicion.id!)">
+                      <input
+                        type="checkbox"
+                        [checked]="formularioInstalacion.controls.posicionesCatalogoIds.value.includes(posicion.id!)"
+                        [disabled]="posicionOcupada(posicion.id!)"
+                        (change)="alternarPosicion(posicion.id!, $any($event.target).checked)"
+                      />
+                      <span>
+                        <strong>{{ posicion.nombre }}</strong>
+                        <small>{{ posicion.codigo }}</small>
+                        @if (posicionOcupada(posicion.id!)) { <small>Ocupada</small> }
+                      </span>
+                    </label>
+                  }
+                }
+              </div>
+              <strong class="total-posiciones">
+                {{ formularioInstalacion.controls.posicionesCatalogoIds.value.length }} componentes serán instalados
+              </strong>
+            </section>
+          }
+        }
+        @if (formularioInstalacion.touched && formularioInstalacion.invalid) {<p class="error-formulario">Revisa los campos obligatorios y los valores numéricos.</p>}
+        <div class="acciones-formulario"><button type="button" class="boton-cancelar" (click)="mostrarInstalacion.set(false)">Cancelar</button><button type="submit" class="boton-principal" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Registrar instalación' }}</button></div>
+      </form>
+    </section>
+  }
+
+  @if (componenteRetirando(); as componente) {
+    <section class="formulario-contenedor formulario-retiro">
+      <div class="formulario-encabezado"><div><h2>Retirar componente</h2><p>{{ componente.catalogoComponente.nombre }} · {{ componente.unidad.numeroUnidad }}</p></div><button type="button" class="boton-cerrar" aria-label="Cerrar formulario" (click)="componenteRetirando.set(null)">×</button></div>
+      <form [formGroup]="formularioRetiro" (ngSubmit)="guardarRetiro()">
+        <div class="campos">
+          <div class="campo"><label for="fechaRetiro">Fecha de retiro *</label><input id="fechaRetiro" type="date" [min]="componente.fechaInstalacion.slice(0, 10)" [max]="fechaActual" formControlName="fechaRetiro" /></div>
+          <div class="campo"><label for="kmRetiro">Kilometraje de retiro *</label><input id="kmRetiro" type="number" [min]="componente.kilometrajeInstalacion" [max]="componente.unidad.kilometrajeActual" step="1" formControlName="kilometrajeRetiro" /></div>
+          <div class="campo campo-amplio"><label for="motivoRetiro">Motivo *</label><textarea id="motivoRetiro" rows="3" formControlName="motivoRetiro"></textarea></div>
+        </div>
+        <div class="acciones-formulario"><button type="button" class="boton-cancelar" (click)="componenteRetirando.set(null)">Cancelar</button><button type="submit" class="boton-peligro" [disabled]="guardando()">Confirmar retiro</button></div>
+      </form>
+    </section>
+  }
+
+  @if (componenteReemplazando(); as componente) {
+    <section class="formulario-contenedor formulario-reemplazo">
+      <div class="formulario-encabezado">
+        <div>
+          <h2>Reemplazar componente</h2>
+          <p>
+            {{ componente.catalogoComponente.nombre }} ·
+            {{ componente.unidad.numeroUnidad }} ·
+            {{ componente.posicionCatalogo?.nombre || componente.posicion || 'General' }}
+          </p>
+        </div>
+        <button type="button" class="boton-cerrar" aria-label="Cerrar formulario" (click)="componenteReemplazando.set(null)">×</button>
+      </div>
+
+      <form [formGroup]="formularioReemplazo" (ngSubmit)="guardarReemplazo()">
+        <fieldset class="bloque-formulario">
+          <legend>Datos del retiro</legend>
+          <div class="campos">
+            <div class="campo"><label for="reemplazoFechaRetiro">Fecha de retiro *</label><input id="reemplazoFechaRetiro" type="date" [min]="componente.fechaInstalacion.slice(0, 10)" [max]="fechaActual" formControlName="fechaRetiro" /></div>
+            <div class="campo"><label for="reemplazoKmRetiro">Kilometraje de retiro *</label><input id="reemplazoKmRetiro" type="number" [min]="componente.kilometrajeInstalacion" [max]="componente.unidad.kilometrajeActual" step="1" formControlName="kilometrajeRetiro" /></div>
+            <div class="campo campo-amplio"><label for="reemplazoMotivo">Motivo del reemplazo *</label><textarea id="reemplazoMotivo" rows="3" formControlName="motivoRetiro"></textarea></div>
+            <div class="campo campo-amplio"><label for="reemplazoObservaciones">Observaciones</label><textarea id="reemplazoObservaciones" rows="2" formControlName="observacionesRetiro"></textarea></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="bloque-formulario">
+          <legend>Nuevo componente</legend>
+          <div class="datos-fijos">
+            <span><strong>Catálogo:</strong> {{ componente.catalogoComponente.nombre }}</span>
+            <span><strong>Posición:</strong> {{ componente.posicionCatalogo?.nombre || componente.posicion || 'General' }}</span>
+          </div>
+          <div class="campos">
+            <div class="campo"><label for="reemplazoMarca">Marca *</label><input id="reemplazoMarca" formControlName="marca" /></div>
+            <div class="campo"><label for="reemplazoModelo">Modelo *</label><input id="reemplazoModelo" formControlName="modelo" /></div>
+            <div class="campo"><label for="reemplazoSerie">Número de serie</label><input id="reemplazoSerie" formControlName="numeroSerie" /></div>
+            <div class="campo"><label for="reemplazoFechaInstalacion">Fecha de instalación *</label><input id="reemplazoFechaInstalacion" type="date" [min]="formularioReemplazo.controls.fechaRetiro.value || componente.fechaInstalacion.slice(0, 10)" [max]="fechaActual" formControlName="fechaInstalacion" /></div>
+            <div class="campo"><label for="reemplazoKmInstalacion">Kilometraje de instalación *</label><input id="reemplazoKmInstalacion" type="number" [min]="formularioReemplazo.controls.kilometrajeRetiro.value || componente.kilometrajeInstalacion" [max]="componente.unidad.kilometrajeActual" step="1" formControlName="kilometrajeInstalacion" /></div>
+            <div class="campo"><label for="reemplazoVidaMeses">Vida útil personalizada (meses)</label><input id="reemplazoVidaMeses" type="number" min="1" step="1" formControlName="vidaUtilMeses" /></div>
+            <div class="campo"><label for="reemplazoVidaKm">Vida útil personalizada (km)</label><input id="reemplazoVidaKm" type="number" min="1" step="1" formControlName="vidaUtilKm" /></div>
+            <div class="campo"><label for="reemplazoAlertaDias">Umbral preventivo (días)</label><input id="reemplazoAlertaDias" type="number" min="0" step="1" formControlName="alertaDiasAntes" /></div>
+            <div class="campo"><label for="reemplazoAlertaKm">Umbral preventivo (km)</label><input id="reemplazoAlertaKm" type="number" min="0" step="1" formControlName="alertaKmAntes" /></div>
+          </div>
+        </fieldset>
+
+        @if (formularioReemplazo.touched && formularioReemplazo.invalid) {
+          <p class="error-formulario">Revisa los campos obligatorios y los valores indicados.</p>
+        }
+        <div class="acciones-formulario">
+          <button type="button" class="boton-cancelar" (click)="componenteReemplazando.set(null)" [disabled]="guardando()">Cancelar</button>
+          <button type="submit" class="boton-principal" [disabled]="guardando()">{{ guardando() ? 'Reemplazando...' : 'Confirmar reemplazo' }}</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (cargando()) {<div class="estado-carga">Cargando componentes...</div>} @else {
+    <div class="tabla-contenedor"><table><thead><tr><th>Unidad</th><th>Componente</th><th>Marca / modelo</th><th>Posición</th><th>Instalación</th><th>Estado</th><th>Vida útil</th><th>Acciones</th></tr></thead><tbody>
+      @for (componente of componentes(); track componente.id) {
+        <tr>
+          <td data-label="Unidad"><strong>{{ componente.unidad.numeroUnidad }}</strong><br />{{ componente.unidad.placa }}</td>
+          <td data-label="Componente">{{ componente.catalogoComponente.nombre }}</td>
+          <td data-label="Marca / modelo">{{ componente.marca }} {{ componente.modelo }}</td>
+          <td data-label="Posición">{{ componente.posicionCatalogo?.nombre || componente.posicion || 'General' }}</td>
+          <td data-label="Instalación">{{ componente.fechaInstalacion.slice(0, 10) }}<br />{{ componente.kilometrajeInstalacion }} km</td>
+          <td data-label="Estado"><span class="estado" [class.estado-retirado]="componente.estado === 'RETIRADO'">{{ componente.estado }}</span></td>
+          <td data-label="Vida útil">
+            @if (componente.evaluacionVidaUtil; as evaluacion) {
+              <div class="vida-util" [style.--color-riesgo]="colorNivelRiesgo(evaluacion.nivelRiesgo)">
+                <span>Vida restante: <strong>{{ evaluacion.porcentajeVidaRestante }}%</strong></span>
+                <progress
+                  max="100"
+                  [value]="evaluacion.porcentajeVidaRestante"
+                  [style.accent-color]="colorNivelRiesgo(evaluacion.nivelRiesgo)"
+                  [attr.aria-label]="'Vida restante de ' + componente.catalogoComponente.nombre"
+                ></progress>
+                <strong class="nivel-riesgo">{{ evaluacion.nivelRiesgo }}</strong>
+                <small>{{ evaluacion.estado }}</small>
+                @if (evaluacion.motivo !== 'NINGUNO') {
+                  <small>Motivo: {{ evaluacion.motivo }}</small>
+                }
+                <small>
+                  @if (evaluacion.diasRestantes !== null) {
+                    {{ evaluacion.diasRestantes }} días restantes
+                  }
+                  @if (evaluacion.diasRestantes !== null && evaluacion.kilometrosRestantes !== null) { · }
+                  @if (evaluacion.kilometrosRestantes !== null) {
+                    {{ evaluacion.kilometrosRestantes }} km restantes
+                  }
+                </small>
+              </div>
+            } @else {
+              <span class="historial">No aplica al historial retirado</span>
+            }
+          </td>
+          <td data-label="Acciones">@if (componente.estado === 'INSTALADO') {<div class="acciones-componente"><button type="button" class="boton-tabla" (click)="abrirRetiro(componente)">Retirar</button><button type="button" class="boton-tabla boton-reemplazar" (click)="abrirReemplazo(componente)">Reemplazar</button></div>} @else {<span class="historial">Retirado {{ componente.fechaRetiro?.slice(0, 10) }}</span>}</td>
+        </tr>
+      } @empty {<tr class="fila-vacia"><td colspan="8" class="sin-registros">No hay componentes instalados.</td></tr>}
+    </tbody></table></div>
+  }
+</section>

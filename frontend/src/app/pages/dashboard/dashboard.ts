@@ -69,6 +69,19 @@ export class Dashboard implements OnInit {
     });
   }
 
+  colorNivelRiesgo(
+    nivel: 'VERDE' | 'NARANJA' | 'AMARILLO' | 'ROJO',
+  ): string {
+    const colores = {
+      VERDE: '#16a34a',
+      NARANJA: '#ea580c',
+      AMARILLO: '#ca8a04',
+      ROJO: '#dc2626',
+    } as const;
+
+    return colores[nivel];
+  }
+
   private obtenerFechaActual(): string {
     const fecha = new Date();
 

@@ -320,6 +320,83 @@
           </div>
         }
       </section>
+
+      <section class="alertas-mantenimiento">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Alertas de componentes</h2>
+
+            <p>
+              Componentes próximos a cambio o con su vida útil agotada.
+            </p>
+          </div>
+        </div>
+
+        @if (datos.alertasComponentes.length === 0) {
+          <div class="sin-alertas-mantenimiento">
+            <strong>Sin alertas de componentes</strong>
+
+            <p>No hay componentes que requieran atención preventiva.</p>
+          </div>
+        } @else {
+          <div class="lista-alertas">
+            @for (alerta of datos.alertasComponentes; track alerta.id) {
+              <article
+                class="alerta-unidad"
+                [style.border-left]="
+                  '4px solid ' + colorNivelRiesgo(alerta.nivelRiesgo)
+                "
+              >
+                <div>
+                  <span
+                    class="alerta-tipo"
+                    [style.color]="colorNivelRiesgo(alerta.nivelRiesgo)"
+                  >
+                    Riesgo {{ alerta.nivelRiesgo }}
+                  </span>
+
+                  <strong>
+                    {{ alerta.unidad }} · {{ alerta.placa }}
+                  </strong>
+
+                  <small>
+                    {{ alerta.nombreComponente }}
+                    @if (alerta.posicion) {
+                      · {{ alerta.posicion }}
+                    }
+                    @if (alerta.marca || alerta.modelo) {
+                      · {{ alerta.marca }} {{ alerta.modelo }}
+                    }
+                  </small>
+                </div>
+
+                <div class="alerta-kilometraje">
+                  <span>Vida restante</span>
+
+                  <strong>{{ alerta.porcentajeVidaRestante }}%</strong>
+
+                  <progress
+                    max="100"
+                    [value]="alerta.porcentajeVidaRestante"
+                    [style.accent-color]="
+                      colorNivelRiesgo(alerta.nivelRiesgo)
+                    "
+                    [attr.aria-label]="
+                      'Vida restante de ' + alerta.nombreComponente
+                    "
+                  ></progress>
+                </div>
+
+                <div class="alerta-kilometraje">
+                  <span>Estado</span>
+                  <strong>{{ alerta.estado }}</strong>
+                  <small>Motivo: {{ alerta.motivo }}</small>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
     }
 
     <section class="alertas-mantenimiento">

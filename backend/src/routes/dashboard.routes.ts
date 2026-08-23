@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 
 import { prisma } from '../lib/prisma.js';
+import { obtenerAlertasComponentes } from '../services/alertas-componentes.service.js';
 
 export const dashboardRouter = Router();
 
@@ -22,7 +23,13 @@ dashboardRouter.get(
       const fechaFin = new Date(fechaInicio);
       fechaFin.setUTCDate(fechaFin.getUTCDate() + 1);
 
-      const [registros, mantenimientos, gastos, unidadesAlertas] =
+      const [
+        registros,
+        mantenimientos,
+        gastos,
+        unidadesAlertas,
+        alertasComponentes,
+      ] =
         await Promise.all([
           prisma.registroDiario.findMany({
             where: {
@@ -93,6 +100,7 @@ dashboardRouter.get(
               numeroUnidad: 'asc',
             },
           }),
+          obtenerAlertasComponentes(fechaInicio),
         ]);
 
       const montoLiquidado = registros.reduce(
@@ -222,6 +230,7 @@ dashboardRouter.get(
             requeridas: mantenimientosRequeridos,
             proximas: proximosMantenimientos,
           },
+          alertasComponentes,
         },
       });
     } catch (error) {

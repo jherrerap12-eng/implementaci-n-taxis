@@ -60,6 +60,7 @@ model Unidad {
   registrosDiarios RegistroDiario[]
   mantenimientos   Mantenimiento[]
   gastos           Gasto[]
+  componentes      ComponenteUnidad[]
 
   @@map("unidades")
 }
@@ -112,6 +113,24 @@ enum EstadoMantenimiento {
   FINALIZADO
 }
 
+enum EstadoComponenteUnidad {
+  INSTALADO
+  RETIRADO
+}
+
+enum ModoInstalacionComponente {
+  INDIVIDUAL
+  POSICIONADO
+}
+
+enum AccionMantenimientoComponente {
+  INSPECCION
+  MANTENIMIENTO
+  INSTALACION
+  RETIRO
+  REEMPLAZO
+}
+
 model Mantenimiento {
   id            Int                 @id @default(autoincrement())
   unidadId      Int                 @map("unidad_id")
@@ -124,12 +143,105 @@ model Mantenimiento {
   creadoEn      DateTime            @default(now()) @map("creado_en")
   actualizadoEn DateTime            @updatedAt @map("actualizado_en")
 
-  unidad Unidad @relation(fields: [unidadId], references: [id])
+  unidad      Unidad                    @relation(fields: [unidadId], references: [id])
+  componentes MantenimientoComponente[]
 
   @@index([unidadId])
   @@index([estado])
   @@map("mantenimientos")
 }
+
+model CatalogoComponente {
+  id                     Int      @id @default(autoincrement())
+  nombre                 String   @db.VarChar(100)
+  descripcion            String?
+  vidaUtilMesesDefault   Int?     @map("vida_util_meses_default")
+  vidaUtilKmDefault      Int?     @map("vida_util_km_default")
+  alertaDiasAntesDefault Int      @default(30) @map("alerta_dias_antes_default")
+  alertaKmAntesDefault   Int      @default(500) @map("alerta_km_antes_default")
+  modoInstalacion        ModoInstalacionComponente @default(INDIVIDUAL) @map("modo_instalacion")
+  activo                 Boolean  @default(true)
+  creadoEn               DateTime @default(now()) @map("creado_en")
+  actualizadoEn          DateTime @updatedAt @map("actualizado_en")
+
+  componentesUnidad ComponenteUnidad[]
+  posiciones         PosicionCatalogoComponente[]
+
+  @@index([activo])
+  @@map("catalogo_componentes")
+}
+
+model PosicionCatalogoComponente {
+  id                   Int      @id @default(autoincrement())
+  catalogoComponenteId Int      @map("catalogo_componente_id")
+  codigo               String   @db.VarChar(60)
+  nombre               String   @db.VarChar(100)
+  orden                Int      @default(0)
+  activo               Boolean  @default(true)
+  creadoEn             DateTime @default(now()) @map("creado_en")
+  actualizadoEn        DateTime @updatedAt @map("actualizado_en")
+
+  catalogoComponente CatalogoComponente @relation(fields: [catalogoComponenteId], references: [id], onDelete: Restrict)
+  componentesUnidad ComponenteUnidad[]
+
+  @@unique([catalogoComponenteId, codigo], map: "uq_posiciones_catalogo_componente_codigo")
+  @@index([catalogoComponenteId, activo])
+  @@map("posiciones_catalogo_componentes")
+}
+
+model ComponenteUnidad {
+  id                    Int                     @id @default(autoincrement())
+  unidadId              Int                     @map("unidad_id")
+  catalogoComponenteId  Int                     @map("catalogo_componente_id")
+  posicionCatalogoId    Int?                    @map("posicion_catalogo_id")
+  marca                 String?                 @db.VarChar(100)
+  modelo                String?                 @db.VarChar(100)
+  numeroSerie           String?                 @map("numero_serie") @db.VarChar(120)
+  posicion              String?                 @db.VarChar(80)
+  cantidad              Int                     @default(1)
+  fechaInstalacion      DateTime                @map("fecha_instalacion") @db.Date
+  kilometrajeInstalacion Int                    @map("kilometraje_instalacion")
+  vidaUtilMeses         Int?                    @map("vida_util_meses")
+  vidaUtilKm            Int?                    @map("vida_util_km")
+  alertaDiasAntes       Int                     @default(30) @map("alerta_dias_antes")
+  alertaKmAntes         Int                     @default(500) @map("alerta_km_antes")
+  estado                EstadoComponenteUnidad  @default(INSTALADO)
+  fechaRetiro           DateTime?               @map("fecha_retiro") @db.Date
+  kilometrajeRetiro     Int?                    @map("kilometraje_retiro")
+  motivoRetiro          String?                 @map("motivo_retiro")
+  observaciones         String?
+  creadoEn              DateTime                @default(now()) @map("creado_en")
+  actualizadoEn         DateTime                @updatedAt @map("actualizado_en")
+
+  unidad             Unidad                     @relation(fields: [unidadId], references: [id])
+  catalogoComponente CatalogoComponente          @relation(fields: [catalogoComponenteId], references: [id])
+  posicionCatalogo   PosicionCatalogoComponente? @relation(fields: [posicionCatalogoId], references: [id], onDelete: Restrict)
+  mantenimientos     MantenimientoComponente[]
+
+  @@index([unidadId, estado])
+  @@index([catalogoComponenteId])
+  @@index([posicionCatalogoId])
+  @@index([fechaInstalacion])
+  @@map("componentes_unidad")
+}
+
+model MantenimientoComponente {
+  id                 Int                            @id @default(autoincrement())
+  mantenimientoId    Int                            @map("mantenimiento_id")
+  componenteUnidadId Int                            @map("componente_unidad_id")
+  accion             AccionMantenimientoComponente
+  observaciones      String?
+  creadoEn           DateTime                       @default(now()) @map("creado_en")
+
+  mantenimiento    Mantenimiento   @relation(fields: [mantenimientoId], references: [id], onDelete: Cascade)
+  componenteUnidad ComponenteUnidad @relation(fields: [componenteUnidadId], references: [id])
+
+  @@unique([mantenimientoId, componenteUnidadId, accion], map: "uq_mantenimientos_componentes_accion")
+  @@index([mantenimientoId])
+  @@index([componenteUnidadId])
+  @@map("mantenimientos_componentes")
+}
+
 enum TipoGasto {
   REPUESTOS_MENORES
   PINCHAZO

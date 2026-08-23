@@ -25,6 +25,23 @@ export interface AlertaMantenimientoDashboard {
   proximoMantenimientoKm: number | null;
 }
 
+export interface AlertaComponenteDashboard {
+  id: number;
+  unidad: string;
+  placa: string;
+  nombreComponente: string;
+  marca: string | null;
+  modelo: string | null;
+  posicion: string | null;
+  estado: 'PROXIMO_CAMBIO' | 'URGENTE';
+  motivo: 'TIEMPO' | 'KILOMETRAJE' | 'AMBOS';
+  nivelRiesgo: 'VERDE' | 'NARANJA' | 'AMARILLO' | 'ROJO';
+  porcentajeVidaRestante: number;
+  diasRestantes: number | null;
+  kilometrosRestantes: number | null;
+  detalle: string;
+}
+
 export interface ResumenDashboard {
   fecha: string;
   totales: TotalesGeneralesIngresos;
@@ -33,6 +50,7 @@ export interface ResumenDashboard {
     requeridas: AlertaMantenimientoDashboard[];
     proximas: AlertaMantenimientoDashboard[];
   };
+  alertasComponentes: AlertaComponenteDashboard[];
 }
 
 interface ApiResponse<T> {

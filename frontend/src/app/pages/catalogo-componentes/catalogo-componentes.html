@@ -1,0 +1,184 @@
+<section class="pagina-catalogo">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Mantenimiento preventivo</span>
+      <h1>Catálogo de componentes</h1>
+      <p>Configura los tipos de componentes y sus valores de vida útil.</p>
+    </div>
+
+    <div class="acciones-encabezado">
+      <button type="button" class="boton-secundario" (click)="cargar()" [disabled]="cargando()">
+        {{ cargando() ? 'Actualizando...' : 'Actualizar listado' }}
+      </button>
+      <button type="button" class="boton-principal" (click)="abrirNuevo()">
+        Nuevo componente
+      </button>
+    </div>
+  </header>
+
+  @if (mensajeExito()) { <div class="mensaje-exito">{{ mensajeExito() }}</div> }
+  @if (mensajeError()) { <div class="mensaje-error" role="alert">{{ mensajeError() }}</div> }
+
+  @if (mostrarFormulario()) {
+    <section class="formulario-contenedor">
+      <div class="formulario-encabezado">
+        <div>
+          <h2>{{ componenteEditandoId() === null ? 'Nuevo componente' : 'Editar componente' }}</h2>
+          <p>La configuración solo se usará como valor predeterminado en instalaciones futuras.</p>
+        </div>
+        <button type="button" class="boton-cerrar" aria-label="Cerrar formulario" (click)="cerrarFormulario()">×</button>
+      </div>
+
+      <form [formGroup]="formulario" (ngSubmit)="guardar()">
+        <div class="campos">
+          <div class="campo">
+            <label for="nombre">Nombre *</label>
+            <input id="nombre" type="text" formControlName="nombre" />
+            @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+              <small>Ingresa un nombre de 2 a 100 caracteres.</small>
+            }
+          </div>
+
+          <div class="campo campo-amplio">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
+          </div>
+
+          <div class="campo">
+            <label for="modoInstalacion">Modo de instalación *</label>
+            <select
+              id="modoInstalacion"
+              formControlName="modoInstalacion"
+              (change)="cambiarModo()"
+            >
+              <option value="INDIVIDUAL">Individual</option>
+              <option value="POSICIONADO">Posicionado</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="vidaMeses">Vida útil en meses</label>
+            <input id="vidaMeses" type="number" min="1" step="1" formControlName="vidaUtilMesesDefault" />
+          </div>
+
+          <div class="campo">
+            <label for="vidaKm">Vida útil en kilómetros</label>
+            <input id="vidaKm" type="number" min="1" step="1" formControlName="vidaUtilKmDefault" />
+          </div>
+
+          @if (formulario.touched && formulario.hasError('vidaUtilRequerida')) {
+            <small class="error-vida">Configura la vida útil en meses, kilómetros o ambos.</small>
+          }
+
+          <div class="campo">
+            <label for="alertaDias">Días de alerta preventiva *</label>
+            <input id="alertaDias" type="number" min="0" step="1" formControlName="alertaDiasAntesDefault" />
+          </div>
+
+          <div class="campo">
+            <label for="alertaKm">Kilómetros de alerta preventiva *</label>
+            <input id="alertaKm" type="number" min="0" step="1" formControlName="alertaKmAntesDefault" />
+          </div>
+        </div>
+
+        @if (formulario.controls.modoInstalacion.value === 'POSICIONADO') {
+          <section class="configuracion-posiciones" formArrayName="posiciones">
+            <div class="posiciones-encabezado">
+              <div>
+                <h3>Posiciones disponibles</h3>
+                <p>Cada posición seleccionada generará una instalación independiente.</p>
+              </div>
+              <button type="button" class="boton-secundario" (click)="agregarPosicion()">
+                Agregar posición
+              </button>
+            </div>
+
+            @for (posicion of posiciones.controls; track posicion; let indice = $index) {
+              <div class="fila-posicion" [formGroupName]="indice">
+                <div class="campo">
+                  <label [for]="'codigo-' + indice">Código *</label>
+                  <input [id]="'codigo-' + indice" formControlName="codigo" placeholder="DELANTERA_IZQUIERDA" />
+                </div>
+                <div class="campo">
+                  <label [for]="'nombre-posicion-' + indice">Nombre *</label>
+                  <input [id]="'nombre-posicion-' + indice" formControlName="nombre" placeholder="Delantera izquierda" />
+                </div>
+                <div class="campo campo-orden">
+                  <label [for]="'orden-' + indice">Orden</label>
+                  <input [id]="'orden-' + indice" type="number" min="0" formControlName="orden" />
+                </div>
+                <label class="control-activo">
+                  <input type="checkbox" formControlName="activo" /> Activa
+                </label>
+                <button type="button" class="boton-quitar" (click)="desactivarPosicion(indice)">
+                  Quitar
+                </button>
+              </div>
+            } @empty {
+              <p class="sin-posiciones">Agrega las posiciones permitidas para este componente.</p>
+            }
+          </section>
+        }
+
+        <div class="acciones-formulario">
+          <button type="button" class="boton-cancelar" (click)="cerrarFormulario()" [disabled]="guardando()">Cancelar</button>
+          <button type="submit" class="boton-principal" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar componente' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (cargando()) {
+    <div class="estado-carga">Cargando catálogo...</div>
+  } @else {
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th><th>Modo</th><th>Descripción</th><th>Vida útil</th>
+            <th>Alertas preventivas</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (componente of componentes(); track componente.id) {
+            <tr>
+              <td data-label="Nombre"><strong>{{ componente.nombre }}</strong></td>
+              <td data-label="Modo">
+                {{ componente.modoInstalacion }}
+                @if (componente.modoInstalacion === 'POSICIONADO') {
+                  <small>{{ componente.posiciones.length }} posiciones</small>
+                }
+              </td>
+              <td data-label="Descripción">{{ componente.descripcion || 'Sin descripción' }}</td>
+              <td data-label="Vida útil">
+                <span>{{ componente.vidaUtilMesesDefault === null ? '—' : componente.vidaUtilMesesDefault + ' meses' }}</span><br />
+                <span>{{ componente.vidaUtilKmDefault === null ? '—' : componente.vidaUtilKmDefault + ' km' }}</span>
+              </td>
+              <td data-label="Alertas">
+                {{ componente.alertaDiasAntesDefault }} días<br />
+                {{ componente.alertaKmAntesDefault }} km
+              </td>
+              <td data-label="Estado">
+                <span class="estado" [class.estado-inactivo]="!componente.activo">
+                  {{ componente.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td data-label="Acciones">
+                <div class="acciones-tabla">
+                  <button type="button" class="boton-tabla" (click)="editar(componente)">Editar</button>
+                  <button type="button" class="boton-tabla boton-estado" (click)="cambiarEstado(componente)" [disabled]="procesandoId() === componente.id">
+                    {{ componente.activo ? 'Inactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr class="fila-vacia"><td colspan="7" class="sin-registros">No hay componentes registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
