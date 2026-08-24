@@ -243,6 +243,31 @@ td small {
   white-space: normal;
 }
 
+.componentes-atendidos {
+  min-width: 230px;
+  white-space: normal;
+}
+
+.lista-componentes {
+  display: grid;
+  gap: 8px;
+}
+
+.componente-atendido {
+  display: grid;
+  gap: 3px;
+  border-left: 3px solid #2563eb;
+  padding: 7px 9px;
+  background: #f8fafc;
+}
+
+.componente-atendido span,
+.componente-atendido small,
+.sin-componentes {
+  color: #64748b;
+  font-size: 12px;
+}
+
 .tipo-mantenimiento-movil {
   display: none;
 }
@@ -401,6 +426,14 @@ td small {
 
   .descripcion-tabla {
     min-width: 0;
+  }
+
+  .componentes-atendidos {
+    min-width: 0;
+  }
+
+  .lista-componentes {
+    width: 100%;
   }
 
   .boton-finalizar {

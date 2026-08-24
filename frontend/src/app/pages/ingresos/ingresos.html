@@ -36,7 +36,8 @@
     </form>
   </header>
 
-  <div class="periodos">
+  <div class="controles-periodo">
+    <div class="periodos">
     <button
       type="button"
       [class.periodo-activo]="periodoSeleccionado() === 1"
@@ -71,6 +72,16 @@
       [disabled]="cargando()"
     >
       30 días
+    </button>
+    </div>
+
+    <button
+      type="button"
+      class="boton-exportar"
+      (click)="exportarPdf()"
+      [disabled]="exportandoPdf() || cargando() || !hayDatosExportables()"
+    >
+      {{ exportandoPdf() ? 'Generando PDF...' : 'Exportar PDF' }}
     </button>
   </div>
 

@@ -69,31 +69,47 @@ export const instalarComponenteSchema = z
   })
   .strict();
 
-export const retirarComponenteSchema = z
-  .object({
-    fechaRetiro: fecha,
-    kilometrajeRetiro: z.number().int().nonnegative(),
-    motivoRetiro: z.string().trim().min(3).max(1000),
-  })
-  .strict();
+const mantenimientoOperacionSchema = z.discriminatedUnion('tipo', [
+  z.object({
+    tipo: z.literal('EXISTENTE'),
+    mantenimientoId: z.number().int().positive(),
+  }).strict(),
+  z.object({
+    tipo: z.literal('NUEVO'),
+    fechaInicio: fecha,
+    descripcion: z.string().trim().min(3).max(2000),
+    costo: z.number().finite().nonnegative(),
+  }).strict(),
+]);
 
-export const reemplazarComponenteSchema = z
-  .object({
-    fechaRetiro: fecha,
-    kilometrajeRetiro: z.number().int().nonnegative(),
-    motivoRetiro: z.string().trim().min(3).max(1000),
-    observacionesRetiro: textoOpcional(2000),
-    marca: z.string().trim().min(1).max(100),
-    modelo: z.string().trim().min(1).max(100),
-    numeroSerie: textoOpcional(120),
-    fechaInstalacion: fecha,
-    kilometrajeInstalacion: z.number().int().nonnegative(),
-    vidaUtilMeses: enteroPositivoOpcional,
-    vidaUtilKm: enteroPositivoOpcional,
-    alertaDiasAntes: enteroNoNegativoOpcional,
-    alertaKmAntes: enteroNoNegativoOpcional,
-  })
-  .strict();
+export const retirarComponenteSchema = z.object({
+  mantenimiento: mantenimientoOperacionSchema,
+  fechaRetiro: fecha,
+  kilometrajeRetiro: z.number().int().nonnegative(),
+  motivoRetiro: z.string().trim().min(3).max(1000),
+  observaciones: textoOpcional(2000),
+}).strict();
+
+const nuevoComponenteReemplazoSchema = z.object({
+  marca: z.string().trim().min(1).max(100),
+  modelo: z.string().trim().min(1).max(100),
+  numeroSerie: textoOpcional(120),
+  fechaInstalacion: fecha,
+  kilometrajeInstalacion: z.number().int().nonnegative(),
+  vidaUtilMeses: enteroPositivoOpcional,
+  vidaUtilKm: enteroPositivoOpcional,
+  alertaDiasAntes: enteroNoNegativoOpcional,
+  alertaKmAntes: enteroNoNegativoOpcional,
+}).strict();
+
+export const reemplazarComponenteSchema = z.object({
+  mantenimiento: mantenimientoOperacionSchema,
+  fechaRetiro: fecha,
+  kilometrajeRetiro: z.number().int().nonnegative(),
+  motivoRetiro: z.string().trim().min(3).max(1000),
+  observaciones: textoOpcional(2000),
+  nuevoComponente: nuevoComponenteReemplazoSchema,
+}).strict();
 
 export type InstalarComponenteDatos = z.infer<
   typeof instalarComponenteSchema

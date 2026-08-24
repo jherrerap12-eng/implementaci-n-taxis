@@ -18,6 +18,7 @@ import { dashboardRouter } from './routes/dashboard.routes.js';
 import { componentesRouter } from './routes/componentes.routes.js';
 import { catalogoComponentesRouter } from './routes/catalogo-componentes.routes.js';
 import { componentesUnidadRouter } from './routes/componentes-unidad.routes.js';
+import { indicadoresMantenimientoRouter } from './routes/indicadores-mantenimiento.routes.js';
 
 dotenv.config();
 
@@ -38,6 +39,12 @@ app.use(
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+app.use(
+  '/api/indicadores-mantenimiento',
+  autenticar,
+  autorizarRoles('SUPERADMIN', 'DUENO'),
+  indicadoresMantenimientoRouter,
+);
 app.use(
   '/api/componentes-unidad',
   autenticar,

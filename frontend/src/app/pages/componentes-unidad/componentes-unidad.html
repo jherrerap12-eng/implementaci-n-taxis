@@ -7,12 +7,21 @@
     </div>
     <div class="acciones-encabezado">
       <button type="button" class="boton-secundario" (click)="cargarDatos()" [disabled]="cargando()">Actualizar</button>
-      <button type="button" class="boton-principal" (click)="abrirInstalacion()">Instalar componente</button>
+      @if (vistaActiva() === 'INSTALADOS') {
+        <button type="button" class="boton-principal" (click)="abrirInstalacion()">Instalar componente</button>
+      }
     </div>
   </header>
 
   @if (mensajeExito()) { <div class="mensaje-exito">{{ mensajeExito() }}</div> }
   @if (mensajeError()) { <div class="mensaje-error" role="alert">{{ mensajeError() }}</div> }
+
+  <nav class="selector-vista" aria-label="Vista de componentes">
+    <button type="button" [class.activo]="vistaActiva() === 'INSTALADOS'" (click)="vistaActiva.set('INSTALADOS')">Instalados</button>
+    <button type="button" [class.activo]="vistaActiva() === 'HISTORIAL'" (click)="vistaActiva.set('HISTORIAL')">Historial</button>
+  </nav>
+
+  @if (vistaActiva() === 'INSTALADOS') {
 
   @if (mostrarInstalacion()) {
     <section class="formulario-contenedor">
@@ -80,11 +89,54 @@
     <section class="formulario-contenedor formulario-retiro">
       <div class="formulario-encabezado"><div><h2>Retirar componente</h2><p>{{ componente.catalogoComponente.nombre }} · {{ componente.unidad.numeroUnidad }}</p></div><button type="button" class="boton-cerrar" aria-label="Cerrar formulario" (click)="componenteRetirando.set(null)">×</button></div>
       <form [formGroup]="formularioRetiro" (ngSubmit)="guardarRetiro()">
+        <fieldset class="bloque-formulario">
+          <legend>Mantenimiento</legend>
+          <div class="opciones-mantenimiento">
+            <label class="opcion-mantenimiento">
+              <input type="radio" value="EXISTENTE" formControlName="tipoMantenimiento" [disabled]="mantenimientosActivos().length === 0" (change)="seleccionarTipoMantenimiento('EXISTENTE', 'RETIRO')" />
+              Usar mantenimiento existente
+            </label>
+            <label class="opcion-mantenimiento">
+              <input type="radio" value="NUEVO" formControlName="tipoMantenimiento" (change)="seleccionarTipoMantenimiento('NUEVO', 'RETIRO')" />
+              Crear nuevo mantenimiento
+            </label>
+          </div>
+
+          @if (cargandoMantenimientos()) {
+            <p>Consultando mantenimientos activos...</p>
+          } @else if (formularioRetiro.controls.tipoMantenimiento.value === 'EXISTENTE') {
+            <div class="campo">
+              <label for="retiroMantenimientoExistente">Mantenimiento activo *</label>
+              <select id="retiroMantenimientoExistente" formControlName="mantenimientoId">
+                @for (mantenimiento of mantenimientosActivos(); track mantenimiento.id) {
+                  <option [ngValue]="mantenimiento.id">
+                    #{{ mantenimiento.id }} · {{ mantenimiento.descripcion }} · {{ mantenimiento.fechaInicio.slice(0, 10) }} · Q{{ formatearCosto(mantenimiento.costo) }}
+                  </option>
+                }
+              </select>
+            </div>
+          } @else {
+            @if (mantenimientosActivos().length === 0) {
+              <p class="aviso-mantenimiento">La unidad no tiene mantenimientos activos. Crea uno para continuar.</p>
+            }
+            <div class="campos">
+              <div class="campo"><label for="retiroMantenimientoFecha">Fecha de inicio *</label><input id="retiroMantenimientoFecha" type="date" [max]="fechaActual" formControlName="mantenimientoFechaInicio" /></div>
+              <div class="campo"><label for="retiroMantenimientoCosto">Costo total *</label><input id="retiroMantenimientoCosto" type="number" min="0" step="0.01" formControlName="mantenimientoCosto" /></div>
+              <div class="campo campo-amplio"><label for="retiroMantenimientoDescripcion">Descripción *</label><textarea id="retiroMantenimientoDescripcion" rows="2" formControlName="mantenimientoDescripcion"></textarea></div>
+            </div>
+          }
+          <p class="nota-costo">El costo corresponde al mantenimiento completo.</p>
+        </fieldset>
+
+        <fieldset class="bloque-formulario">
+          <legend>Datos del retiro</legend>
         <div class="campos">
           <div class="campo"><label for="fechaRetiro">Fecha de retiro *</label><input id="fechaRetiro" type="date" [min]="componente.fechaInstalacion.slice(0, 10)" [max]="fechaActual" formControlName="fechaRetiro" /></div>
           <div class="campo"><label for="kmRetiro">Kilometraje de retiro *</label><input id="kmRetiro" type="number" [min]="componente.kilometrajeInstalacion" [max]="componente.unidad.kilometrajeActual" step="1" formControlName="kilometrajeRetiro" /></div>
           <div class="campo campo-amplio"><label for="motivoRetiro">Motivo *</label><textarea id="motivoRetiro" rows="3" formControlName="motivoRetiro"></textarea></div>
+          <div class="campo campo-amplio"><label for="observacionesRetiroSimple">Observaciones</label><textarea id="observacionesRetiroSimple" rows="2" formControlName="observaciones"></textarea></div>
         </div>
+        </fieldset>
         <div class="acciones-formulario"><button type="button" class="boton-cancelar" (click)="componenteRetirando.set(null)">Cancelar</button><button type="submit" class="boton-peligro" [disabled]="guardando()">Confirmar retiro</button></div>
       </form>
     </section>
@@ -105,6 +157,45 @@
       </div>
 
       <form [formGroup]="formularioReemplazo" (ngSubmit)="guardarReemplazo()">
+        <fieldset class="bloque-formulario">
+          <legend>Mantenimiento</legend>
+          <div class="opciones-mantenimiento">
+            <label class="opcion-mantenimiento">
+              <input type="radio" value="EXISTENTE" formControlName="tipoMantenimiento" [disabled]="mantenimientosActivos().length === 0" (change)="seleccionarTipoMantenimiento('EXISTENTE')" />
+              Usar mantenimiento existente
+            </label>
+            <label class="opcion-mantenimiento">
+              <input type="radio" value="NUEVO" formControlName="tipoMantenimiento" (change)="seleccionarTipoMantenimiento('NUEVO')" />
+              Crear nuevo mantenimiento
+            </label>
+          </div>
+
+          @if (cargandoMantenimientos()) {
+            <p>Consultando mantenimientos activos...</p>
+          } @else if (formularioReemplazo.controls.tipoMantenimiento.value === 'EXISTENTE') {
+            <div class="campo">
+              <label for="mantenimientoExistente">Mantenimiento activo *</label>
+              <select id="mantenimientoExistente" formControlName="mantenimientoId">
+                @for (mantenimiento of mantenimientosActivos(); track mantenimiento.id) {
+                  <option [ngValue]="mantenimiento.id">
+                    #{{ mantenimiento.id }} · {{ mantenimiento.descripcion }} · {{ mantenimiento.fechaInicio.slice(0, 10) }} · Q{{ formatearCosto(mantenimiento.costo) }}
+                  </option>
+                }
+              </select>
+            </div>
+          } @else {
+            @if (mantenimientosActivos().length === 0) {
+              <p class="aviso-mantenimiento">La unidad no tiene mantenimientos activos. Crea uno para continuar.</p>
+            }
+            <div class="campos">
+              <div class="campo"><label for="mantenimientoFechaInicio">Fecha de inicio *</label><input id="mantenimientoFechaInicio" type="date" [max]="fechaActual" formControlName="mantenimientoFechaInicio" /></div>
+              <div class="campo"><label for="mantenimientoCosto">Costo total *</label><input id="mantenimientoCosto" type="number" min="0" step="0.01" formControlName="mantenimientoCosto" /></div>
+              <div class="campo campo-amplio"><label for="mantenimientoDescripcion">Descripción *</label><textarea id="mantenimientoDescripcion" rows="2" formControlName="mantenimientoDescripcion"></textarea></div>
+            </div>
+          }
+          <p class="nota-costo">El costo corresponde al mantenimiento completo.</p>
+        </fieldset>
+
         <fieldset class="bloque-formulario">
           <legend>Datos del retiro</legend>
           <div class="campos">
@@ -188,5 +279,74 @@
         </tr>
       } @empty {<tr class="fila-vacia"><td colspan="8" class="sin-registros">No hay componentes instalados.</td></tr>}
     </tbody></table></div>
+  }
+  } @else {
+    <section class="panel-historial-tecnico">
+      <header class="encabezado-historial">
+        <div>
+          <h2>Historial técnico</h2>
+          <p>Consulta el ciclo de vida de componentes retirados o reemplazados.</p>
+        </div>
+        <button type="button" class="boton-principal boton-exportar" (click)="exportarHistorialPdf()" [disabled]="historialFiltrado().length === 0 || exportandoPdf()">
+          {{ exportandoPdf() ? 'Generando PDF...' : 'Exportar PDF' }}
+        </button>
+      </header>
+
+      <div class="filtros-historial">
+        <div class="campo">
+          <label for="filtroUnidadHistorial">Unidad</label>
+          <select id="filtroUnidadHistorial" (change)="cambiarFiltroUnidad($any($event.target).value)">
+            <option value="">Todas</option>
+            @for (unidad of unidadesHistorial(); track unidad.id) {
+              <option [value]="unidad.id">{{ unidad.codigo }} · {{ unidad.placa }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtroComponenteHistorial">Componente</label>
+          <select id="filtroComponenteHistorial" (change)="cambiarFiltroComponente($any($event.target).value)">
+            <option value="">Todos</option>
+            @for (componente of componentesHistorial(); track componente.id) {
+              <option [value]="componente.id">{{ componente.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtroAccionHistorial">Acción</label>
+          <select id="filtroAccionHistorial" (change)="cambiarFiltroAccion($any($event.target).value)">
+            <option value="">Todas</option>
+            <option value="RETIRO">RETIRO</option>
+            <option value="REEMPLAZO">REEMPLAZO</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtroFechaHistorial">Fecha de retiro</label>
+          <input id="filtroFechaHistorial" type="date" [max]="fechaActual" (input)="filtroFechaRetiro.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="tabla-contenedor tabla-historial">
+        <table>
+          <thead><tr><th>Unidad</th><th>Componente</th><th>Posición</th><th>Instalación</th><th>Retiro</th><th>Uso</th><th>Motivo</th><th>Acción / mantenimiento</th><th>Costo total del mantenimiento</th></tr></thead>
+          <tbody>
+            @for (registro of historialFiltrado(); track registro.id) {
+              <tr>
+                <td data-label="Unidad"><strong>{{ registro.unidad.codigo }}</strong><br />{{ registro.unidad.placa }}</td>
+                <td data-label="Componente"><strong>{{ registro.componente.nombre }}</strong><br />{{ registro.componente.marca || '-' }} {{ registro.componente.modelo || '' }}</td>
+                <td data-label="Posición">{{ registro.componente.posicion }}</td>
+                <td data-label="Instalación">{{ registro.instalacion.fecha.slice(0, 10) }}<br />{{ formatearNumero(registro.instalacion.kilometraje) }} km</td>
+                <td data-label="Retiro">{{ registro.retiro.fecha?.slice(0, 10) || 'No disponible' }}<br />{{ formatearNumero(registro.retiro.kilometraje) }}{{ registro.retiro.kilometraje !== null ? ' km' : '' }}</td>
+                <td data-label="Uso">{{ formatearNumero(registro.uso.kilometrosUtilizados) }}{{ registro.uso.kilometrosUtilizados !== null ? ' km' : '' }}<br />{{ registro.uso.diasUtilizados ?? 'No disponible' }}{{ registro.uso.diasUtilizados !== null ? ' días' : '' }}</td>
+                <td data-label="Motivo">{{ registro.retiro.motivo || 'No registrado' }}@if (registro.retiro.observaciones) {<br /><small>{{ registro.retiro.observaciones }}</small>}</td>
+                <td data-label="Acción / mantenimiento">@if (registro.mantenimiento; as mantenimiento) {<strong>{{ mantenimiento.accion }}</strong><br />#{{ mantenimiento.id }} · {{ mantenimiento.descripcion }}@if (mantenimiento.observacionesAccion) {<br /><small>{{ mantenimiento.observacionesAccion }}</small>}} @else {<span class="historial">Sin relación técnica</span>}</td>
+                <td data-label="Costo total del mantenimiento">@if (registro.mantenimiento) { Q{{ formatearCosto(registro.mantenimiento.costoTotal) }} } @else { No disponible }</td>
+              </tr>
+            } @empty {
+              <tr class="fila-vacia"><td colspan="9" class="sin-registros">No hay registros que coincidan con los filtros.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   }
 </section>

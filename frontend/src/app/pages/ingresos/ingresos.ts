@@ -9,6 +9,7 @@ import {
   IngresosService,
   ResumenIngresos,
 } from '../../services/ingresos';
+import { IngresosPdfService } from '../../services/ingresos-pdf';
 
 type PeriodoDias = 1 | 7 | 15 | 30;
 
@@ -21,11 +22,13 @@ type PeriodoDias = 1 | 7 | 15 | 30;
 export class Ingresos implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly ingresosService = inject(IngresosService);
+  private readonly ingresosPdfService = inject(IngresosPdfService);
 
   readonly resumen = signal<ResumenIngresos | null>(null);
   readonly cargando = signal(false);
   readonly mensajeError = signal('');
   readonly periodoSeleccionado = signal<PeriodoDias>(1);
+  readonly exportandoPdf = signal(false);
 
   readonly formularioConsulta =
     this.formBuilder.nonNullable.group({
@@ -90,6 +93,27 @@ export class Ingresos implements OnInit {
     }
 
     return `Últimos ${dias} días`;
+  }
+
+  hayDatosExportables(): boolean {
+    const datos = this.resumen();
+    return Boolean(datos && (datos.porDia.length || datos.porUnidad.length || datos.porPiloto.length));
+  }
+
+  async exportarPdf(): Promise<void> {
+    const datos = this.resumen();
+    if (!datos || !this.hayDatosExportables() || this.exportandoPdf()) return;
+
+    this.exportandoPdf.set(true);
+    this.mensajeError.set('');
+    try {
+      await this.ingresosPdfService.generar(datos, this.periodoSeleccionado());
+    } catch (error) {
+      console.error('Error al generar el reporte PDF de ingresos:', error);
+      this.mensajeError.set('No fue posible generar el reporte PDF');
+    } finally {
+      this.exportandoPdf.set(false);
+    }
   }
 
   private obtenerFechaActual(): string {

@@ -4,10 +4,12 @@ import { Observable } from 'rxjs';
 
 import {
   ComponenteUnidad,
+  HistorialTecnicoComponente,
   InstalarComponenteRequest,
   ReemplazarComponenteRequest,
   RespuestaComponentesUnidad,
   ResultadoReemplazoComponente,
+  ResultadoRetiroComponente,
   RetirarComponenteRequest,
 } from '../models/componentes-unidad.models';
 
@@ -23,6 +25,14 @@ export class ComponentesUnidadService {
     );
   }
 
+  obtenerHistorial(): Observable<
+    RespuestaComponentesUnidad<HistorialTecnicoComponente[]>
+  > {
+    return this.http.get<
+      RespuestaComponentesUnidad<HistorialTecnicoComponente[]>
+    >(`${this.apiUrl}/historial`);
+  }
+
   instalar(
     datos: InstalarComponenteRequest,
   ): Observable<RespuestaComponentesUnidad<ComponenteUnidad[]>> {
@@ -35,8 +45,8 @@ export class ComponentesUnidadService {
   retirar(
     id: number,
     datos: RetirarComponenteRequest,
-  ): Observable<RespuestaComponentesUnidad<ComponenteUnidad>> {
-    return this.http.patch<RespuestaComponentesUnidad<ComponenteUnidad>>(
+  ): Observable<RespuestaComponentesUnidad<ResultadoRetiroComponente>> {
+    return this.http.patch<RespuestaComponentesUnidad<ResultadoRetiroComponente>>(
       `${this.apiUrl}/${id}/retirar`,
       datos,
     );

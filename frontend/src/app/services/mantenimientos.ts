@@ -16,6 +16,22 @@ export interface Mantenimiento {
   creadoEn: string;
   actualizadoEn: string;
   unidad: Unidad;
+  componentes: MantenimientoComponente[];
+}
+
+export interface MantenimientoComponente {
+  id: number;
+  accion: 'INSPECCION' | 'MANTENIMIENTO' | 'INSTALACION' | 'RETIRO' | 'REEMPLAZO';
+  observaciones: string | null;
+  creadoEn: string;
+  componente: {
+    id: number;
+    nombre: string;
+    marca: string | null;
+    modelo: string | null;
+    posicion: string | null;
+    estado: 'INSTALADO' | 'RETIRADO';
+  };
 }
 
 export interface CrearMantenimientoRequest {
@@ -49,6 +65,18 @@ export class MantenimientosService {
   > {
     return this.http.get<ApiResponse<Mantenimiento[]>>(
       this.apiUrl,
+    );
+  }
+
+  obtenerPorId(mantenimientoId: number): Observable<ApiResponse<Mantenimiento>> {
+    return this.http.get<ApiResponse<Mantenimiento>>(`${this.apiUrl}/${mantenimientoId}`);
+  }
+
+  obtenerActivosPorUnidad(
+    unidadId: number,
+  ): Observable<ApiResponse<Mantenimiento[]>> {
+    return this.http.get<ApiResponse<Mantenimiento[]>>(
+      `${this.apiUrl}/activos/unidad/${unidadId}`,
     );
   }
 

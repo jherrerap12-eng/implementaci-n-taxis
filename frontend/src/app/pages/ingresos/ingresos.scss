@@ -94,10 +94,17 @@ p {
   opacity: 0.6;
 }
 
+.controles-periodo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
 .periodos {
   display: flex;
   gap: 10px;
-  margin-bottom: 24px;
 }
 
 .periodos button {
@@ -319,6 +326,28 @@ tbody tr:last-child td {
   text-align: center;
 }
 
+.boton-exportar {
+  min-height: 40px;
+  border: 1px solid #1d4ed8;
+  border-radius: 8px;
+  padding: 10px 18px;
+  background: #1d4ed8;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.boton-exportar:hover:not(:disabled) {
+  background: #1e40af;
+}
+
+.boton-exportar:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .periodo-registro-movil {
   display: none;
 }
@@ -353,7 +382,16 @@ tbody tr:last-child td {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .controles-periodo {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .periodos button {
+    width: 100%;
+  }
+
+  .boton-exportar {
     width: 100%;
   }
 
@@ -378,7 +416,8 @@ tbody tr:last-child td {
 
 @media (max-width: 600px) {
   .boton-consultar,
-  .periodos button {
+  .periodos button,
+  .boton-exportar {
     min-height: 44px;
   }
 

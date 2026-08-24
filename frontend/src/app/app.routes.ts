@@ -20,6 +20,7 @@ import { Unidades } from './pages/unidades/unidades';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { CatalogoComponentes } from './pages/catalogo-componentes/catalogo-componentes';
 import { ComponentesUnidad } from './pages/componentes-unidad/componentes-unidad';
+import { IndicadoresMantenimientoPage } from './pages/indicadores-mantenimiento/indicadores-mantenimiento';
 import { AuthService } from './services/auth';
 
 const redireccionInicial: RedirectFunction = () => {
@@ -81,6 +82,13 @@ export const routes: Routes = [
       roles: ['SUPERADMIN', 'DUENO'],
     },
     title: 'Ingresos | Sistema de flotilla',
+  },
+  {
+    path: 'indicadores-mantenimiento',
+    component: IndicadoresMantenimientoPage,
+    canActivate: [authGuard],
+    data: { roles: ['SUPERADMIN', 'DUENO'] },
+    title: 'Indicadores de mantenimiento | Sistema de flotilla',
   },
   {
     path: 'pilotos',

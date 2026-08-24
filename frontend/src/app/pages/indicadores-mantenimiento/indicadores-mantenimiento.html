@@ -1,0 +1,97 @@
+<section class="pagina-indicadores">
+  <header class="encabezado">
+    <div>
+      <span class="seccion">Mantenimiento preventivo</span>
+      <h1>Indicadores de mantenimiento</h1>
+      <p>Análisis de todo el historial de reemplazos y vida útil de componentes.</p>
+    </div>
+    <button type="button" class="boton-actualizar" (click)="consultar()" [disabled]="cargando()">
+      {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </header>
+
+  @if (mensajeError()) {
+    <div class="mensaje mensaje-error">{{ mensajeError() }}</div>
+  }
+
+  @if (cargando()) {
+    <div class="mensaje">Consultando indicadores de mantenimiento...</div>
+  } @else if (datos(); as indicadores) {
+    <section class="resumen-periodo">
+      <div><span>Periodo analizado</span><strong>Todo el historial</strong></div>
+      <div><span>Reemplazos analizados</span><strong>{{ indicadores.metadatos.reemplazosAnalizados }}</strong></div>
+    </section>
+
+    @if (indicadores.metadatos.reemplazosAnalizados === 0) {
+      <div class="mensaje mensaje-informativo">
+        Aún no existen suficientes reemplazos registrados para generar indicadores de mantenimiento.
+      </div>
+    }
+
+    <section class="bloque">
+      <div class="bloque-encabezado">
+        <div><h2>Componentes reemplazados por unidad</h2><p>Incluye todas las unidades, incluso las que no registran reemplazos.</p></div>
+      </div>
+      <div class="lista-unidades">
+        @for (unidad of indicadores.reemplazosPorUnidad; track unidad.unidadId) {
+          <article class="fila-indicador">
+            <div><strong>{{ unidad.numeroUnidad }}</strong><span>{{ unidad.placa }}</span></div>
+            <div class="valor"><strong>{{ unidad.reemplazos }}</strong><span>reemplazos</span></div>
+          </article>
+        } @empty {
+          <div class="sin-datos">No existen unidades registradas.</div>
+        }
+      </div>
+    </section>
+
+    <section class="bloque">
+      <div class="bloque-encabezado">
+        <div><h2>Vida útil real promedio vs esperada</h2><p>Resultados separados por kilometraje y tiempo para cada catálogo.</p></div>
+      </div>
+      <div class="catalogos">
+        @for (catalogo of indicadores.vidaUtilPorCatalogo; track catalogo.catalogoComponenteId) {
+          <article class="tarjeta-catalogo">
+            <h3>{{ catalogo.nombre }}</h3>
+            <div class="criterios">
+              <section class="criterio">
+                <div class="criterio-titulo"><strong>Kilometraje</strong><span [class]="claseMuestra(catalogo.kilometraje)">{{ mensajeMuestra(catalogo.kilometraje) }}</span></div>
+                <dl>
+                  <div><dt>Vida esperada promedio</dt><dd>{{ numero(catalogo.kilometraje.vidaEsperadaPromedioKm) }}{{ catalogo.kilometraje.vidaEsperadaPromedioKm !== null ? ' km' : '' }}</dd></div>
+                  <div><dt>Vida real promedio</dt><dd>{{ numero(catalogo.kilometraje.vidaRealPromedioKm) }}{{ catalogo.kilometraje.vidaRealPromedioKm !== null ? ' km' : '' }}</dd></div>
+                  <div><dt>Cumplimiento promedio</dt><dd>{{ numero(catalogo.kilometraje.cumplimientoPromedio, 2) }}{{ catalogo.kilometraje.cumplimientoPromedio !== null ? '%' : '' }}</dd></div>
+                  <div><dt>Muestra</dt><dd>{{ catalogo.kilometraje.muestra }} componentes</dd></div>
+                </dl>
+                @if (catalogo.kilometraje.registrosExcluidos > 0) { <small>{{ catalogo.kilometraje.registrosExcluidos }} registros inválidos excluidos</small> }
+              </section>
+              <section class="criterio">
+                <div class="criterio-titulo"><strong>Tiempo</strong><span [class]="claseMuestra(catalogo.tiempo)">{{ mensajeMuestra(catalogo.tiempo) }}</span></div>
+                <dl>
+                  <div><dt>Vida esperada promedio</dt><dd>{{ numero(catalogo.tiempo.vidaEsperadaPromedioDias) }}{{ catalogo.tiempo.vidaEsperadaPromedioDias !== null ? ' días' : '' }}</dd></div>
+                  <div><dt>Vida real promedio</dt><dd>{{ numero(catalogo.tiempo.vidaRealPromedioDias) }}{{ catalogo.tiempo.vidaRealPromedioDias !== null ? ' días' : '' }}</dd></div>
+                  <div><dt>Cumplimiento promedio</dt><dd>{{ numero(catalogo.tiempo.cumplimientoPromedio, 2) }}{{ catalogo.tiempo.cumplimientoPromedio !== null ? '%' : '' }}</dd></div>
+                  <div><dt>Muestra</dt><dd>{{ catalogo.tiempo.muestra }} componentes</dd></div>
+                </dl>
+                @if (catalogo.tiempo.registrosExcluidos > 0) { <small>{{ catalogo.tiempo.registrosExcluidos }} registros inválidos excluidos</small> }
+              </section>
+            </div>
+          </article>
+        } @empty {
+          <div class="sin-datos">No hay datos suficientes para comparar la vida útil.</div>
+        }
+      </div>
+    </section>
+
+    <section class="bloque">
+      <div class="bloque-encabezado">
+        <div><h2>Componentes con mayor frecuencia de reemplazo</h2><p>Cada componente físico reemplazado se contabiliza una vez.</p></div>
+      </div>
+      <div class="frecuencias">
+        @for (componente of indicadores.frecuenciaReemplazo; track componente.catalogoComponenteId) {
+          <article class="fila-indicador"><strong>{{ componente.nombre }}</strong><div class="valor"><strong>{{ componente.reemplazos }}</strong><span>reemplazos</span></div></article>
+        } @empty {
+          <div class="sin-datos">Aún no existen reemplazos registrados.</div>
+        }
+      </div>
+    </section>
+  }
+</section>

@@ -81,7 +81,7 @@ export async function obtenerAlertasComponentes(
         marca: componente.marca,
         modelo: componente.modelo,
         posicion:
-          componente.posicionCatalogo?.nombre ?? componente.posicion,
+          componente.posicion ?? componente.posicionCatalogo?.nombre ?? null,
         estado: evaluacion.estado,
         motivo: evaluacion.motivo,
         nivelRiesgo: evaluacion.nivelRiesgo,

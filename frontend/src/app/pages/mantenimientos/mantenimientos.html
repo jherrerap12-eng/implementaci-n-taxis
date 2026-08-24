@@ -159,6 +159,7 @@
                 <th>Descripción</th>
                 <th>Costo</th>
                 <th>Estado</th>
+                <th>Componentes atendidos</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -223,6 +224,27 @@
                           : 'Finalizado'
                       }}
                     </span>
+                  </td>
+
+                  <td class="componentes-atendidos" data-label="Componentes atendidos">
+                    @if (mantenimiento.componentes.length > 0) {
+                      <div class="lista-componentes">
+                        @for (relacion of mantenimiento.componentes; track relacion.id) {
+                          <article class="componente-atendido">
+                            <strong>{{ relacion.componente.nombre }}</strong>
+                            @if (relacion.componente.posicion) {
+                              <span>Posición: {{ relacion.componente.posicion }}</span>
+                            }
+                            <span>Acción: {{ relacion.accion }}</span>
+                            @if (relacion.observaciones) {
+                              <small>{{ relacion.observaciones }}</small>
+                            }
+                          </article>
+                        }
+                      </div>
+                    } @else {
+                      <span class="sin-componentes">-</span>
+                    }
                   </td>
 
                   <td data-label="Acciones">

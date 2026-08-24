@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 
 import { Prisma } from '../generated/prisma/client.js';
+import { ErrorMantenimiento } from '../services/mantenimientos.service.js';
 import {
   instalarComponenteSchema,
   reemplazarComponenteSchema,
@@ -10,6 +11,7 @@ import {
   ErrorComponentesUnidad,
   instalarComponente,
   listarComponentesUnidad,
+  obtenerHistorialTecnicoComponentes,
   reemplazarComponente,
   retirarComponente,
 } from '../services/componentes-unidad.service.js';
@@ -18,6 +20,11 @@ export const componentesUnidadRouter = Router();
 
 function manejarError(error: unknown, res: Response): void {
   if (error instanceof ErrorComponentesUnidad) {
+    res.status(error.status).json({ success: false, message: error.message });
+    return;
+  }
+
+  if (error instanceof ErrorMantenimiento) {
     res.status(error.status).json({ success: false, message: error.message });
     return;
   }
@@ -48,6 +55,19 @@ componentesUnidadRouter.get('/', async (_req, res): Promise<void> => {
       success: true,
       message: 'Componentes instalados obtenidos correctamente',
       data: componentes,
+    });
+  } catch (error) {
+    manejarError(error, res);
+  }
+});
+
+componentesUnidadRouter.get('/historial', async (_req, res): Promise<void> => {
+  try {
+    const historial = await obtenerHistorialTecnicoComponentes();
+    res.status(200).json({
+      success: true,
+      message: 'Historial técnico obtenido correctamente',
+      data: historial,
     });
   } catch (error) {
     manejarError(error, res);

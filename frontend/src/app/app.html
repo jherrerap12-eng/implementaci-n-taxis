@@ -48,6 +48,10 @@
           Ingresos
         </a>
 
+        <a routerLink="/indicadores-mantenimiento" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
+          Indicadores de mantenimiento
+        </a>
+
         @if (authService.tieneRol('SUPERADMIN')) {
           <a routerLink="/pilotos" routerLinkActive="opcion-activa" (click)="cerrarMenu()">
             Pilotos

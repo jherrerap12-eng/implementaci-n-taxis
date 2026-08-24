@@ -5,6 +5,10 @@ import type {
   RetirarComponenteDatos,
 } from '../schemas/componentes-unidad.schemas.js';
 import { evaluarVidaUtilComponente } from './vida-util.service.js';
+import {
+  crearMantenimientoEnTransaccion,
+  validarMantenimientoActivo,
+} from './mantenimientos.service.js';
 
 const seleccionComponenteUnidad = {
   id: true,
@@ -96,6 +100,108 @@ export async function listarComponentesUnidad() {
           )
         : null,
   }));
+}
+
+export async function obtenerHistorialTecnicoComponentes() {
+  const componentes = await prisma.componenteUnidad.findMany({
+    where: { estado: 'RETIRADO' },
+    select: {
+      id: true,
+      marca: true,
+      modelo: true,
+      posicion: true,
+      fechaInstalacion: true,
+      kilometrajeInstalacion: true,
+      fechaRetiro: true,
+      kilometrajeRetiro: true,
+      motivoRetiro: true,
+      observaciones: true,
+      unidad: {
+        select: { id: true, numeroUnidad: true, placa: true },
+      },
+      catalogoComponente: { select: { id: true, nombre: true } },
+      posicionCatalogo: { select: { nombre: true } },
+      mantenimientos: {
+        where: { accion: { in: ['REEMPLAZO', 'RETIRO'] } },
+        select: {
+          id: true,
+          accion: true,
+          observaciones: true,
+          creadoEn: true,
+          mantenimiento: {
+            select: {
+              id: true,
+              descripcion: true,
+              fechaInicio: true,
+              costo: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ fechaRetiro: 'desc' }, { id: 'desc' }],
+  });
+
+  const milisegundosDia = 86_400_000;
+
+  return componentes.map((componente) => {
+    const relacionSalida = [...componente.mantenimientos].sort((a, b) => {
+      const prioridadA = a.accion === 'REEMPLAZO' ? 0 : 1;
+      const prioridadB = b.accion === 'REEMPLAZO' ? 0 : 1;
+      return prioridadA - prioridadB || b.creadoEn.getTime() - a.creadoEn.getTime();
+    })[0];
+
+    const kilometrosUtilizados = componente.kilometrajeRetiro === null
+      ? null
+      : Math.max(0, componente.kilometrajeRetiro - componente.kilometrajeInstalacion);
+    const diasUtilizados = componente.fechaRetiro === null
+      ? null
+      : Math.max(
+          0,
+          Math.floor(
+            (componente.fechaRetiro.getTime() - componente.fechaInstalacion.getTime()) /
+              milisegundosDia,
+          ),
+        );
+
+    return {
+      id: componente.id,
+      unidad: {
+        id: componente.unidad.id,
+        codigo: componente.unidad.numeroUnidad,
+        placa: componente.unidad.placa,
+      },
+      componente: {
+        catalogoId: componente.catalogoComponente.id,
+        nombre: componente.catalogoComponente.nombre,
+        marca: componente.marca,
+        modelo: componente.modelo,
+        posicion:
+          componente.posicion ?? componente.posicionCatalogo?.nombre ?? 'General',
+      },
+      instalacion: {
+        fecha: componente.fechaInstalacion,
+        kilometraje: componente.kilometrajeInstalacion,
+      },
+      retiro: {
+        fecha: componente.fechaRetiro,
+        kilometraje: componente.kilometrajeRetiro,
+        motivo: componente.motivoRetiro,
+        observaciones: componente.observaciones,
+      },
+      uso: { kilometrosUtilizados, diasUtilizados },
+      mantenimiento: relacionSalida
+        ? {
+            id: relacionSalida.mantenimiento.id,
+            accion: relacionSalida.accion,
+            descripcion: relacionSalida.mantenimiento.descripcion,
+            fechaInicio: relacionSalida.mantenimiento.fechaInicio,
+            costoTotal: relacionSalida.mantenimiento.costo,
+            observacionesAccion: relacionSalida.observaciones,
+          }
+        : null,
+    };
+  });
 }
 
 export async function instalarComponente(
@@ -269,6 +375,7 @@ export async function retirarComponente(
       select: {
         id: true,
         estado: true,
+        unidadId: true,
         fechaInstalacion: true,
         kilometrajeInstalacion: true,
         unidad: { select: { kilometrajeActual: true } },
@@ -282,6 +389,20 @@ export async function retirarComponente(
     if (componente.estado !== 'INSTALADO') {
       throw new ErrorComponentesUnidad(409, 'El componente ya fue retirado');
     }
+
+    const mantenimiento =
+      datos.mantenimiento.tipo === 'EXISTENTE'
+        ? await validarMantenimientoActivo(
+            datos.mantenimiento.mantenimientoId,
+            componente.unidadId,
+            transaccion,
+          )
+        : await crearMantenimientoEnTransaccion(transaccion, {
+            unidadId: componente.unidadId,
+            fechaInicio: datos.mantenimiento.fechaInicio,
+            descripcion: datos.mantenimiento.descripcion,
+            costo: datos.mantenimiento.costo,
+          });
 
     if (
       datos.fechaRetiro < componente.fechaInstalacion ||
@@ -310,6 +431,7 @@ export async function retirarComponente(
         fechaRetiro: datos.fechaRetiro,
         kilometrajeRetiro: datos.kilometrajeRetiro,
         motivoRetiro: datos.motivoRetiro,
+        observaciones: datos.observaciones,
       },
     });
 
@@ -317,10 +439,28 @@ export async function retirarComponente(
       throw new ErrorComponentesUnidad(409, 'El componente ya fue retirado');
     }
 
-    return transaccion.componenteUnidad.findUniqueOrThrow({
+    const componenteRetirado = await transaccion.componenteUnidad.findUniqueOrThrow({
       where: { id: componenteId },
       select: seleccionComponenteUnidad,
     });
+
+    await transaccion.mantenimientoComponente.create({
+      data: {
+        mantenimientoId: mantenimiento.id,
+        componenteUnidadId: componenteId,
+        accion: 'RETIRO',
+        observaciones: datos.observaciones,
+      },
+    });
+
+    return {
+      mantenimiento: {
+        id: mantenimiento.id,
+        estado: mantenimiento.estado,
+        costo: mantenimiento.costo,
+      },
+      componente: componenteRetirado,
+    };
   });
 }
 
@@ -387,6 +527,22 @@ export async function reemplazarComponente(
       );
     }
 
+    const mantenimiento =
+      datos.mantenimiento.tipo === 'EXISTENTE'
+        ? await validarMantenimientoActivo(
+            datos.mantenimiento.mantenimientoId,
+            componente.unidadId,
+            transaccion,
+          )
+        : await crearMantenimientoEnTransaccion(transaccion, {
+            unidadId: componente.unidadId,
+            fechaInicio: datos.mantenimiento.fechaInicio,
+            descripcion: datos.mantenimiento.descripcion,
+            costo: datos.mantenimiento.costo,
+          });
+
+    const nuevoComponente = datos.nuevoComponente;
+
     const fechaActual = fechaActualGuatemala();
     if (
       datos.fechaRetiro < componente.fechaInstalacion ||
@@ -409,8 +565,8 @@ export async function reemplazarComponente(
     }
 
     if (
-      datos.fechaInstalacion < datos.fechaRetiro ||
-      datos.fechaInstalacion > fechaActual
+      nuevoComponente.fechaInstalacion < datos.fechaRetiro ||
+      nuevoComponente.fechaInstalacion > fechaActual
     ) {
       throw new ErrorComponentesUnidad(
         400,
@@ -419,8 +575,8 @@ export async function reemplazarComponente(
     }
 
     if (
-      datos.kilometrajeInstalacion < datos.kilometrajeRetiro ||
-      datos.kilometrajeInstalacion > componente.unidad.kilometrajeActual
+      nuevoComponente.kilometrajeInstalacion < datos.kilometrajeRetiro ||
+      nuevoComponente.kilometrajeInstalacion > componente.unidad.kilometrajeActual
     ) {
       throw new ErrorComponentesUnidad(
         400,
@@ -443,10 +599,10 @@ export async function reemplazarComponente(
     }
 
     const vidaUtilMeses =
-      datos.vidaUtilMeses ??
+      nuevoComponente.vidaUtilMeses ??
       componente.catalogoComponente.vidaUtilMesesDefault;
     const vidaUtilKm =
-      datos.vidaUtilKm ?? componente.catalogoComponente.vidaUtilKmDefault;
+      nuevoComponente.vidaUtilKm ?? componente.catalogoComponente.vidaUtilKmDefault;
 
     if (vidaUtilMeses === null && vidaUtilKm === null) {
       throw new ErrorComponentesUnidad(
@@ -463,7 +619,7 @@ export async function reemplazarComponente(
         kilometrajeRetiro: datos.kilometrajeRetiro,
         motivoRetiro: datos.motivoRetiro,
         observaciones:
-          datos.observacionesRetiro ?? componente.observaciones,
+          datos.observaciones ?? componente.observaciones,
       },
     });
 
@@ -481,22 +637,22 @@ export async function reemplazarComponente(
         posicionCatalogoId: componente.posicionCatalogoId,
         posicion:
           componente.posicionCatalogo?.nombre ?? componente.posicion,
-        marca: datos.marca,
-        modelo: datos.modelo,
-        numeroSerie: datos.numeroSerie,
+        marca: nuevoComponente.marca,
+        modelo: nuevoComponente.modelo,
+        numeroSerie: nuevoComponente.numeroSerie,
         cantidad:
           componente.catalogoComponente.modoInstalacion === 'POSICIONADO'
             ? 1
             : componente.cantidad,
-        fechaInstalacion: datos.fechaInstalacion,
-        kilometrajeInstalacion: datos.kilometrajeInstalacion,
+        fechaInstalacion: nuevoComponente.fechaInstalacion,
+        kilometrajeInstalacion: nuevoComponente.kilometrajeInstalacion,
         vidaUtilMeses,
         vidaUtilKm,
         alertaDiasAntes:
-          datos.alertaDiasAntes ??
+          nuevoComponente.alertaDiasAntes ??
           componente.catalogoComponente.alertaDiasAntesDefault,
         alertaKmAntes:
-          datos.alertaKmAntes ??
+          nuevoComponente.alertaKmAntes ??
           componente.catalogoComponente.alertaKmAntesDefault,
       },
       select: seleccionComponenteUnidad,
@@ -508,6 +664,31 @@ export async function reemplazarComponente(
         select: seleccionComponenteUnidad,
       });
 
-    return { anterior, nuevo };
+    await transaccion.mantenimientoComponente.createMany({
+      data: [
+        {
+          mantenimientoId: mantenimiento.id,
+          componenteUnidadId: anterior.id,
+          accion: 'REEMPLAZO',
+          observaciones: datos.observaciones ?? datos.motivoRetiro,
+        },
+        {
+          mantenimientoId: mantenimiento.id,
+          componenteUnidadId: nuevo.id,
+          accion: 'INSTALACION',
+          observaciones: datos.observaciones,
+        },
+      ],
+    });
+
+    return {
+      mantenimiento: {
+        id: mantenimiento.id,
+        estado: mantenimiento.estado,
+        costo: mantenimiento.costo,
+      },
+      anterior,
+      nuevo,
+    };
   });
 }
