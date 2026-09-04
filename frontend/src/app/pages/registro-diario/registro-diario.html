@@ -470,6 +470,38 @@
             </div>
           </div>
 
+          <div class="campo campo-completo ahorro-piloto">
+            <label class="opcion-ahorro">
+              <input type="checkbox" formControlName="registrarAhorro" />
+              <span>
+                <strong>Registrar ahorro del piloto</strong>
+                <small>Este fondo no forma parte del monto liquidado.</small>
+              </span>
+            </label>
+
+            @if (formularioRegistro.controls.registrarAhorro.value) {
+              <div class="campo monto-ahorro">
+                <label for="montoAhorro">Monto de ahorro *</label>
+                <div class="campo-moneda">
+                  <span>Q</span>
+                  <input
+                    id="montoAhorro"
+                    type="number"
+                    formControlName="montoAhorro"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </div>
+                @if (
+                  formularioRegistro.controls.montoAhorro.touched &&
+                  formularioRegistro.controls.montoAhorro.invalid
+                ) {
+                  <small>Ingresa un monto positivo con un máximo de dos decimales.</small>
+                }
+              </div>
+            }
+          </div>
+
           <div class="campo campo-completo">
             <label for="observaciones">Observaciones</label>
 

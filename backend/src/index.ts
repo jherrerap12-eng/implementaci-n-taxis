@@ -19,6 +19,7 @@ import { componentesRouter } from './routes/componentes.routes.js';
 import { catalogoComponentesRouter } from './routes/catalogo-componentes.routes.js';
 import { componentesUnidadRouter } from './routes/componentes-unidad.routes.js';
 import { indicadoresMantenimientoRouter } from './routes/indicadores-mantenimiento.routes.js';
+import { ahorroPilotosRouter } from './routes/ahorro-pilotos.routes.js';
 
 dotenv.config();
 
@@ -39,6 +40,12 @@ app.use(
 app.use(express.json());
 
 app.use('/api/auth', authRouter);
+app.use(
+  '/api/ahorro-pilotos',
+  autenticar,
+  autorizarRoles('SUPERADMIN'),
+  ahorroPilotosRouter,
+);
 app.use(
   '/api/indicadores-mantenimiento',
   autenticar,

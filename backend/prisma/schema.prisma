@@ -37,6 +37,7 @@ model Piloto {
   actualizadoEn       DateTime     @updatedAt @map("actualizado_en")
 
   registrosDiarios RegistroDiario[]
+  movimientosAhorro MovimientoAhorroPiloto[]
 
   @@map("pilotos")
 }
@@ -70,6 +71,13 @@ enum EstadoRegistroDiario {
   COMPLETADO
 }
 
+enum TipoMovimientoAhorro {
+  APORTE_DIARIO
+  RETIRO
+  AJUSTE_INGRESO
+  AJUSTE_EGRESO
+}
+
 model RegistroDiario {
   id                 Int                  @id @default(autoincrement())
   pilotoId           Int                  @map("piloto_id")
@@ -86,6 +94,7 @@ model RegistroDiario {
   piloto            Piloto             @relation(fields: [pilotoId], references: [id])
   unidad            Unidad             @relation(fields: [unidadId], references: [id])
   cargaCombustible CargaCombustible?
+  movimientoAhorro MovimientoAhorroPiloto?
 
   @@unique([pilotoId, fecha], map: "uq_registros_diarios_piloto_fecha")
   @@unique([unidadId, fecha], map: "uq_registros_diarios_unidad_fecha")
@@ -93,6 +102,23 @@ model RegistroDiario {
   @@index([pilotoId])
   @@index([unidadId])
   @@map("registros_diarios")
+}
+
+model MovimientoAhorroPiloto {
+  id               Int                  @id @default(autoincrement())
+  pilotoId         Int                  @map("piloto_id")
+  registroDiarioId Int?                 @unique(map: "uq_movimientos_ahorro_registro_diario") @map("registro_diario_id")
+  tipo             TipoMovimientoAhorro
+  monto            Decimal              @db.Decimal(12, 2)
+  descripcion      String?
+  creadoEn         DateTime             @default(now()) @map("creado_en")
+
+  piloto        Piloto          @relation(fields: [pilotoId], references: [id], onDelete: Restrict)
+  registroDiario RegistroDiario? @relation(fields: [registroDiarioId], references: [id], onDelete: Restrict)
+
+  @@index([pilotoId, creadoEn])
+  @@index([tipo])
+  @@map("movimientos_ahorro_pilotos")
 }
 
 model CargaCombustible {

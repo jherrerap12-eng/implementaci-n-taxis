@@ -1,0 +1,29 @@
+<section class="pagina">
+  <header class="encabezado">
+    <div><span class="seccion">Administración</span><h1>Ahorro de taxistas</h1><p>Consulta y administra el fondo independiente de cada piloto.</p></div>
+    <button type="button" class="boton secundario" (click)="cargar()" [disabled]="cargando()">Actualizar</button>
+  </header>
+  @if (mensaje()) { <div class="mensaje exito">{{ mensaje() }}</div> }
+  @if (error()) { <div class="mensaje error" role="alert">{{ error() }}</div> }
+  @if (cargando()) { <div class="estado-carga">Cargando ahorros...</div> } @else {
+    <div class="tabla-contenedor"><table><thead><tr><th>Piloto</th><th>Estado</th><th>Aportado</th><th>Retirado</th><th>Ajustes +</th><th>Ajustes -</th><th>Saldo</th><th>Último movimiento</th><th>Acciones</th></tr></thead><tbody>
+      @for (piloto of pilotos(); track piloto.id) {
+        <tr><td data-label="Piloto"><strong>{{ piloto.codigo }}</strong><span>{{ piloto.nombreCompleto }}</span></td><td data-label="Estado">{{ piloto.estado }}</td><td data-label="Aportado">{{ dinero(piloto.totalAportado) }}</td><td data-label="Retirado">{{ dinero(piloto.totalRetirado) }}</td><td data-label="Ajustes +">{{ dinero(piloto.ajustesIngreso) }}</td><td data-label="Ajustes -">{{ dinero(piloto.ajustesEgreso) }}</td><td data-label="Saldo"><strong>{{ dinero(piloto.saldoDisponible) }}</strong></td><td data-label="Último movimiento">{{ fecha(piloto.ultimoMovimientoEn) }}</td><td data-label="Acciones"><div class="acciones"><button (click)="verMovimientos(piloto)">Movimientos</button><button (click)="abrirAccion(piloto, 'AJUSTE')">Ajuste</button><button (click)="abrirAccion(piloto, 'RETIRO')" [disabled]="piloto.saldoDisponible <= 0">Retirar</button></div></td></tr>
+      } @empty { <tr><td colspan="9">No hay pilotos registrados.</td></tr> }
+    </tbody></table></div>
+  }
+
+  @if (historial(); as datos) {
+    <section class="panel">
+      <div class="panel-cabecera"><div><h2>{{ datos.piloto.nombreCompleto }}</h2><p>Saldo disponible: <strong>{{ dinero(datos.saldoDisponible) }}</strong></p></div><button type="button" class="cerrar" aria-label="Cerrar" (click)="cerrarPanel()">×</button></div>
+      @if (accion() === 'AJUSTE') {
+        <form [formGroup]="formularioAjuste" (ngSubmit)="guardarAjuste()" class="formulario"><h3>Registrar ajuste</h3><label>Tipo<select formControlName="tipo"><option value="INGRESO">Ingreso</option><option value="EGRESO">Egreso</option></select></label><label>Monto<input type="number" min="0.01" step="0.01" formControlName="monto"></label><label>Descripción<input formControlName="descripcion" maxlength="1000"></label><button class="boton" [disabled]="guardando()">Guardar ajuste</button></form>
+      } @else if (accion() === 'RETIRO') {
+        <form [formGroup]="formularioRetiro" (ngSubmit)="guardarRetiro()" class="formulario"><h3>Retirar ahorro</h3><label class="casilla"><input type="checkbox" formControlName="liquidarTodo"> Liquidar ahorro completo</label>@if (!formularioRetiro.controls.liquidarTodo.value) { <label>Monto<input type="number" min="0.01" step="0.01" formControlName="monto"></label> }<label>Descripción<input formControlName="descripcion" maxlength="1000"></label><button class="boton" [disabled]="guardando()">Registrar retiro</button></form>
+      }
+      <h3>Historial de movimientos</h3><div class="movimientos">
+        @for (movimiento of datos.movimientos; track movimiento.id) { <article><div><strong>{{ etiqueta(movimiento.tipo) }}</strong><small>{{ fecha(movimiento.creadoEn) }}</small></div><div class="monto" [class.egreso]="movimiento.signo < 0">{{ movimiento.signo > 0 ? '+' : '-' }}{{ dinero(movimiento.monto) }}</div><p>{{ movimiento.descripcion || 'Sin descripción' }} @if (movimiento.registroDiario) { · Registro #{{ movimiento.registroDiario.id }} }</p><small>Saldo acumulado: {{ dinero(movimiento.saldoAcumulado) }}</small></article> } @empty { <p>No existen movimientos para este piloto.</p> }
+      </div>
+    </section>
+  }
+</section>

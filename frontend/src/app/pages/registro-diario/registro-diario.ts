@@ -1,7 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,6 +18,18 @@ import {
   ResultadoCombustible,
 } from '../../services/registros-diarios';
 import { Unidad } from '../../services/unidades';
+
+function montoAhorroValido(
+  control: AbstractControl<number>,
+): ValidationErrors | null {
+  const valor = Number(control.value);
+  return Number.isFinite(valor) &&
+    valor > 0 &&
+    valor <= 9_999_999_999.99 &&
+    Math.abs(valor * 100 - Math.round(valor * 100)) < 1e-8
+    ? null
+    : { montoAhorroInvalido: true };
+}
 
 @Component({
   selector: 'app-registro-diario',
@@ -83,6 +97,10 @@ export class RegistroDiarioComponent implements OnInit {
         Validators.min(0),
       ],
     ],
+
+    registrarAhorro: [false],
+
+    montoAhorro: [10, [montoAhorroValido]],
 
     observaciones: [''],
   });
@@ -280,6 +298,14 @@ cargarDisponibilidad(): void {
         datosFormulario.montoLiquidado,
       observaciones:
         datosFormulario.observaciones,
+      ...(datosFormulario.registrarAhorro
+        ? {
+            ahorroPiloto: {
+              registrar: true,
+              monto: datosFormulario.montoAhorro,
+            },
+          }
+        : {}),
     };
 
     this.guardando.set(true);
@@ -458,6 +484,8 @@ this.formularioRegistro.reset(
     fecha: this.obtenerFechaActual(),
     kilometrajeFinal: 0,
     montoLiquidado: 0,
+    registrarAhorro: false,
+    montoAhorro: 10,
     observaciones: '',
   },
   {

@@ -11,6 +11,10 @@ interface CrearRegistroDiarioBody {
   kilometrajeFinal?: number | string;
   montoLiquidado?: number | string;
   observaciones?: string;
+  ahorroPiloto?: {
+    registrar?: boolean;
+    monto?: number | string;
+  };
 }
 
 interface RegistrarCombustibleBody {
@@ -329,6 +333,7 @@ registrosDiariosRouter.post(
         kilometrajeFinal,
         montoLiquidado,
         observaciones,
+        ahorroPiloto,
       } = req.body;
 
       if (
@@ -349,6 +354,8 @@ registrosDiariosRouter.post(
       const unidadIdConvertido = Number(unidadId);
       const kilometrajeFinalConvertido = Number(kilometrajeFinal);
       const montoLiquidadoConvertido = Number(montoLiquidado);
+      const registrarAhorro = ahorroPiloto?.registrar === true;
+      const montoAhorroConvertido = Number(ahorroPiloto?.monto);
 
       if (
         !Number.isInteger(pilotoIdConvertido) ||
@@ -392,6 +399,35 @@ registrosDiariosRouter.post(
         res.status(400).json({
           success: false,
           message: 'La fecha ingresada no es válida',
+        });
+        return;
+      }
+
+      if (
+        ahorroPiloto !== undefined &&
+        typeof ahorroPiloto.registrar !== 'boolean'
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'La indicación de ahorro no es válida',
+        });
+        return;
+      }
+
+      if (
+        registrarAhorro &&
+        (!Number.isFinite(montoAhorroConvertido) ||
+          montoAhorroConvertido <= 0 ||
+          montoAhorroConvertido > 9_999_999_999.99 ||
+          Math.abs(
+            montoAhorroConvertido * 100 -
+              Math.round(montoAhorroConvertido * 100),
+          ) >= 1e-8)
+      ) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El ahorro debe ser un monto positivo con un máximo de dos decimales',
         });
         return;
       }
@@ -559,6 +595,12 @@ if (registroDeLaUnidad) {
       }
 
       const registro = await prisma.$transaction(async (transaccion) => {
+        if (registrarAhorro) {
+          await transaccion.$queryRaw(
+            Prisma.sql`SELECT id FROM pilotos WHERE id = ${pilotoIdConvertido} FOR UPDATE`,
+          );
+        }
+
         const nuevoRegistro = await transaccion.registroDiario.create({
           data: {
             pilotoId: pilotoIdConvertido,
@@ -572,8 +614,21 @@ if (registroDeLaUnidad) {
           include: {
             piloto: true,
             unidad: true,
+            movimientoAhorro: true,
           },
         });
+
+        if (registrarAhorro) {
+          await transaccion.movimientoAhorroPiloto.create({
+            data: {
+              pilotoId: pilotoIdConvertido,
+              registroDiarioId: nuevoRegistro.id,
+              tipo: 'APORTE_DIARIO',
+              monto: montoAhorroConvertido.toFixed(2),
+              descripcion: 'Aporte registrado con la operación diaria',
+            },
+          });
+        }
 
         await transaccion.unidad.update({
           where: {
@@ -584,7 +639,16 @@ if (registroDeLaUnidad) {
           },
         });
 
-        return nuevoRegistro;
+        return registrarAhorro
+          ? transaccion.registroDiario.findUniqueOrThrow({
+              where: { id: nuevoRegistro.id },
+              include: {
+                piloto: true,
+                unidad: true,
+                movimientoAhorro: true,
+              },
+            })
+          : nuevoRegistro;
       });
 
       res.status(201).json({

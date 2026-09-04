@@ -22,6 +22,7 @@ import { CatalogoComponentes } from './pages/catalogo-componentes/catalogo-compo
 import { ComponentesUnidad } from './pages/componentes-unidad/componentes-unidad';
 import { IndicadoresMantenimientoPage } from './pages/indicadores-mantenimiento/indicadores-mantenimiento';
 import { AuthService } from './services/auth';
+import { AhorroPilotos } from './pages/ahorro-pilotos/ahorro-pilotos';
 
 const redireccionInicial: RedirectFunction = () => {
   const authService = inject(AuthService);
@@ -89,6 +90,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['SUPERADMIN', 'DUENO'] },
     title: 'Indicadores de mantenimiento | Sistema de flotilla',
+  },
+  {
+    path: 'ahorro-pilotos',
+    component: AhorroPilotos,
+    canActivate: [authGuard],
+    data: { roles: ['SUPERADMIN'] },
+    title: 'Ahorro de taxistas | Sistema de flotilla',
   },
   {
     path: 'pilotos',

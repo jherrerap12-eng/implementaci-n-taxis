@@ -12,6 +12,10 @@ export interface CrearRegistroDiarioRequest {
   kilometrajeFinal: number;
   montoLiquidado: number;
   observaciones?: string;
+  ahorroPiloto?: {
+    registrar: boolean;
+    monto: number;
+  };
 }
 
 export interface RegistrarCombustibleRequest {
@@ -45,6 +49,11 @@ export interface RegistroDiario {
   piloto: Piloto;
   unidad: Unidad;
   cargaCombustible?: CargaCombustible | null;
+  movimientoAhorro?: {
+    id: number;
+    tipo: 'APORTE_DIARIO';
+    monto: string;
+  } | null;
 }
 
 export interface ResultadoCombustible {

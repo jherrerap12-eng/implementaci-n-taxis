@@ -503,6 +503,42 @@ p {
   }
 }
 
+.ahorro-piloto {
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 16px;
+  background: #f8fbff;
+}
+
+.opcion-ahorro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.opcion-ahorro input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.opcion-ahorro span,
+.opcion-ahorro small {
+  display: block;
+}
+
+.opcion-ahorro small {
+  margin-top: 4px;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.monto-ahorro {
+  max-width: 320px;
+  margin-top: 16px;
+}
+
 @media (max-width: 600px) {
   .formulario-contenedor,
   .registro-confirmado {
