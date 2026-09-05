@@ -27,6 +27,11 @@ dotenv.config();
 const app = express();
 const PORT = env.PORT;
 
+// Render entrega las solicitudes a Express a través de un proxy inverso.
+// Confiar solo en el primer salto permite identificar correctamente la IP
+// del cliente en middlewares como express-rate-limit.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 
 app.use(
