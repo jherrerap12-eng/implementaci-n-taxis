@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
@@ -10,7 +11,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AhorroPilotosService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/ahorro-pilotos';
+  private readonly apiUrl = `${environment.apiUrl}/api/ahorro-pilotos`;
 
   listar() {
     return this.http.get<RespuestaApi<ResumenAhorroPiloto[]>>(this.apiUrl);

@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -69,8 +70,7 @@ interface ApiResponse<T> {
 export class UnidadesService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:3000/api/unidades';
+  private readonly apiUrl = `${environment.apiUrl}/api/unidades`;
 
   obtenerUnidades(): Observable<ApiResponse<Unidad[]>> {
     return this.http.get<ApiResponse<Unidad[]>>(

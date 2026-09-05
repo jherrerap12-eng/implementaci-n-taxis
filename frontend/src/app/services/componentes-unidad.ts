@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -16,8 +17,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ComponentesUnidadService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl =
-    'http://localhost:3000/api/componentes-unidad';
+  private readonly apiUrl = `${environment.apiUrl}/api/componentes-unidad`;
 
   listar(): Observable<RespuestaComponentesUnidad<ComponenteUnidad[]>> {
     return this.http.get<RespuestaComponentesUnidad<ComponenteUnidad[]>>(

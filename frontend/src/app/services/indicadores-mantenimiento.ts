@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -13,7 +14,7 @@ interface RespuestaApi<T> {
 @Injectable({ providedIn: 'root' })
 export class IndicadoresMantenimientoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/indicadores-mantenimiento';
+  private readonly apiUrl = `${environment.apiUrl}/api/indicadores-mantenimiento`;
 
   obtener(): Observable<RespuestaApi<IndicadoresMantenimiento>> {
     return this.http.get<RespuestaApi<IndicadoresMantenimiento>>(this.apiUrl);

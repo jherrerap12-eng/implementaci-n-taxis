@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -39,8 +40,7 @@ interface ApiResponse<T> {
 export class GastosService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:3000/api/gastos';
+  private readonly apiUrl = `${environment.apiUrl}/api/gastos`;
 
   obtenerGastos(): Observable<ApiResponse<Gasto[]>> {
     return this.http.get<ApiResponse<Gasto[]>>(

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express, { type Request, type Response } from 'express';
 import helmet from 'helmet';
 
+import { env } from './config/env.js';
 import { prisma } from './lib/prisma.js';
 import { autenticar } from './middleware/autenticar.js';
 import { autorizarRoles } from './middleware/autorizar-roles.js';
@@ -24,7 +25,7 @@ import { ahorroPilotosRouter } from './routes/ahorro-pilotos.routes.js';
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = env.PORT;
 
 app.use(helmet());
 
@@ -33,6 +34,7 @@ app.use(
     origin: [
       /^http:\/\/localhost:\d+$/,
       /^http:\/\/127\.0\.0\.1:\d+$/,
+      ...(env.FRONTEND_URL ? [env.FRONTEND_URL] : []),
     ],
   }),
 );
@@ -156,5 +158,5 @@ app.get(
 );
 
 app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+  console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });

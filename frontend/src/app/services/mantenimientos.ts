@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -57,8 +58,7 @@ interface ApiResponse<T> {
 export class MantenimientosService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:3000/api/mantenimientos';
+  private readonly apiUrl = `${environment.apiUrl}/api/mantenimientos`;
 
   obtenerMantenimientos(): Observable<
     ApiResponse<Mantenimiento[]>

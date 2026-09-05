@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import {
   HttpClient,
   HttpHeaders,
@@ -35,8 +36,7 @@ interface RespuestaUsuarioActual {
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:3000/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/api/auth`;
 
   private readonly claveToken =
     'flotilla_access_token';

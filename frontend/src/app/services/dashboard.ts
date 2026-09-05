@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -62,7 +63,7 @@ interface ApiResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/dashboard';
+  private readonly apiUrl = `${environment.apiUrl}/api/dashboard`;
 
   obtenerDashboard(): Observable<ApiResponse<ResumenDashboard>> {
     return this.http.get<ApiResponse<ResumenDashboard>>(this.apiUrl);
