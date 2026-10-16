@@ -439,7 +439,8 @@
               id="kilometrajeFinal"
               type="number"
               formControlName="kilometrajeFinal"
-              [min]="kilometrajeInicial() ?? 0"
+              [min]="(kilometrajeInicial() ?? 0) + 1"
+              [max]="(kilometrajeInicial() ?? 0) + 300"
               placeholder="Ejemplo: 55250"
             />
 
@@ -447,7 +448,11 @@
               formularioRegistro.controls.kilometrajeFinal.touched &&
               formularioRegistro.controls.kilometrajeFinal.invalid
             ) {
-              <small>Ingresa un kilometraje final válido.</small>
+              @if (formularioRegistro.controls.kilometrajeFinal.hasError('max')) {
+                <small>El recorrido diario no puede superar los 300 km.</small>
+              } @else {
+                <small>El kilometraje final debe ser mayor al kilometraje inicial.</small>
+              }
             }
           </div>
 
@@ -463,11 +468,16 @@
                 id="montoLiquidado"
                 type="number"
                 formControlName="montoLiquidado"
-                min="0"
+                min="205"
+                max="205"
                 step="0.01"
-                placeholder="0.00"
+                readonly
               />
             </div>
+
+            <span class="ayuda-campo">
+              Cuota diaria fija por unidad.
+            </span>
           </div>
 
           <div class="campo campo-completo ahorro-piloto">

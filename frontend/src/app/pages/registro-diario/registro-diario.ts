@@ -91,10 +91,11 @@ export class RegistroDiarioComponent implements OnInit {
     ],
 
     montoLiquidado: [
-      0,
+      205,
       [
         Validators.required,
-        Validators.min(0),
+        Validators.min(205),
+        Validators.max(205),
       ],
     ],
 
@@ -243,6 +244,8 @@ cargarDisponibilidad(): void {
     if (!unidadSeleccionada) {
       this.kilometrajeInicial.set(null);
 
+      this.configurarValidacionKilometraje(null);
+
       this.formularioRegistro.controls.kilometrajeFinal.setValue(
         0,
       );
@@ -251,6 +254,10 @@ cargarDisponibilidad(): void {
     }
 
     this.kilometrajeInicial.set(
+      unidadSeleccionada.kilometrajeActual,
+    );
+
+    this.configurarValidacionKilometraje(
       unidadSeleccionada.kilometrajeActual,
     );
 
@@ -278,11 +285,23 @@ cargarDisponibilidad(): void {
     }
 
     if (
-      datosFormulario.kilometrajeFinal <
+      datosFormulario.kilometrajeFinal <=
       kilometrajeInicial
     ) {
       this.mensajeError.set(
-        'El kilometraje final no puede ser menor al kilometraje inicial',
+        'El kilometraje final debe ser mayor al kilometraje inicial',
+      );
+
+      return;
+    }
+
+    if (
+      datosFormulario.kilometrajeFinal -
+        kilometrajeInicial >
+      300
+    ) {
+      this.mensajeError.set(
+        'El recorrido diario no puede superar los 300 km',
       );
 
       return;
@@ -483,7 +502,7 @@ this.formularioRegistro.reset(
     unidadId: 0,
     fecha: this.obtenerFechaActual(),
     kilometrajeFinal: 0,
-    montoLiquidado: 0,
+    montoLiquidado: 205,
     registrarAhorro: false,
     montoAhorro: 10,
     observaciones: '',
@@ -492,6 +511,8 @@ this.formularioRegistro.reset(
     emitEvent: false,
   },
 );
+
+    this.configurarValidacionKilometraje(null);
 
     this.formularioCombustible.reset({
       sinCombustible: false,
@@ -517,12 +538,32 @@ this.formularioRegistro.reset(
       );
 
       this.kilometrajeInicial.set(null);
+      this.configurarValidacionKilometraje(null);
       this.mensajeError.set('');
       this.mensajeExito.set('');
 
       this.cargarDisponibilidad();
     });
 }
+  private configurarValidacionKilometraje(
+    kilometrajeInicial: number | null,
+  ): void {
+    const control =
+      this.formularioRegistro.controls.kilometrajeFinal;
+
+    control.setValidators(
+      kilometrajeInicial === null
+        ? [Validators.required, Validators.min(1)]
+        : [
+            Validators.required,
+            Validators.min(kilometrajeInicial + 1),
+            Validators.max(kilometrajeInicial + 300),
+          ],
+    );
+
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
   private obtenerFechaActual(): string {
     const fecha = new Date();
 

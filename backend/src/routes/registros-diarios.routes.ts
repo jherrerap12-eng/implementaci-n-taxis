@@ -341,7 +341,11 @@ registrosDiariosRouter.post(
         unidadId === undefined ||
         !fecha?.trim() ||
         kilometrajeFinal === undefined ||
-        montoLiquidado === undefined
+        kilometrajeFinal === null ||
+        kilometrajeFinal === '' ||
+        montoLiquidado === undefined ||
+        montoLiquidado === null ||
+        montoLiquidado === ''
       ) {
         res.status(400).json({
           success: false,
@@ -381,11 +385,12 @@ registrosDiariosRouter.post(
 
       if (
         !Number.isFinite(montoLiquidadoConvertido) ||
-        montoLiquidadoConvertido < 0
+        montoLiquidadoConvertido !== 205
       ) {
         res.status(400).json({
           success: false,
-          message: 'El monto liquidado debe ser un número válido',
+          message:
+            'El monto liquidado debe corresponder a la cuota diaria de Q205',
         });
         return;
       }
@@ -590,6 +595,27 @@ if (registroDeLaUnidad) {
           success: false,
           message:
             'El kilometraje final no puede ser menor al kilometraje actual de la unidad',
+        });
+        return;
+      }
+
+      const kilometrosRecorridos =
+        kilometrajeFinalConvertido - kilometrajeInicial;
+
+      if (kilometrosRecorridos <= 0) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El kilometraje final debe ser mayor al kilometraje actual de la unidad',
+        });
+        return;
+      }
+
+      if (kilometrosRecorridos > 300) {
+        res.status(400).json({
+          success: false,
+          message:
+            'El recorrido diario no puede superar los 300 km',
         });
         return;
       }
