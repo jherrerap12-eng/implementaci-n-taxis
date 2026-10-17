@@ -223,7 +223,9 @@ formatearCosto(costo: string): string {
 
   detalleCumplimiento(mantenimiento: Mantenimiento): string {
     const diferencia = mantenimiento.diferenciaKilometraje;
-    if (diferencia === null) return 'Sin kilometraje programado';
+    if (diferencia == null || !Number.isFinite(diferencia)) {
+      return 'Sin kilometraje programado';
+    }
     if (diferencia === 0) return 'Realizado en el kilometraje exacto';
     if (diferencia < 0) {
       return `Se realizó ${this.formatearKilometraje(Math.abs(diferencia))} km antes`;
