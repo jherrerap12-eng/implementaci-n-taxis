@@ -155,7 +155,7 @@
                 <th>Unidad</th>
                 <th>Fecha inicio</th>
                 <th>Fecha fin</th>
-                <th>Kilometraje</th>
+                <th>Control de kilometraje</th>
                 <th>Descripción</th>
                 <th>Costo</th>
                 <th>Estado</th>
@@ -196,8 +196,27 @@
                     Mantenimiento
                   </td>
 
-                  <td data-label="Kilometraje">
-                    {{ mantenimiento.kilometraje }} km
+                  <td class="control-kilometraje" data-label="Control de kilometraje">
+                    <span>
+                      <small>Solicitado</small>
+                      <strong>
+                        {{ mantenimiento.kilometrajeObjetivo === null
+                          ? '-'
+                          : formatearKilometraje(mantenimiento.kilometrajeObjetivo) + ' km' }}
+                      </strong>
+                    </span>
+                    <span>
+                      <small>Realizado</small>
+                      <strong>{{ formatearKilometraje(mantenimiento.kilometraje) }} km</strong>
+                    </span>
+                    <span
+                      class="resultado-kilometraje"
+                      [class.resultado-exacto]="mantenimiento.cumplimientoKilometraje === 'EXACTO'"
+                      [class.resultado-anticipado]="mantenimiento.cumplimientoKilometraje === 'ANTICIPADO'"
+                      [class.resultado-atrasado]="mantenimiento.cumplimientoKilometraje === 'ATRASADO'"
+                    >
+                      {{ detalleCumplimiento(mantenimiento) }}
+                    </span>
                   </td>
 
                   <td class="descripcion-tabla" data-label="Descripción">

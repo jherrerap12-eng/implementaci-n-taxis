@@ -216,6 +216,21 @@ export class Mantenimientos implements OnInit {
 formatearCosto(costo: string): string {
   return Number(costo).toFixed(2);
 }
+
+  formatearKilometraje(kilometraje: number): string {
+    return new Intl.NumberFormat('es-GT').format(kilometraje);
+  }
+
+  detalleCumplimiento(mantenimiento: Mantenimiento): string {
+    const diferencia = mantenimiento.diferenciaKilometraje;
+    if (diferencia === null) return 'Sin kilometraje programado';
+    if (diferencia === 0) return 'Realizado en el kilometraje exacto';
+    if (diferencia < 0) {
+      return `Se realizó ${this.formatearKilometraje(Math.abs(diferencia))} km antes`;
+    }
+    return `Se pasó ${this.formatearKilometraje(diferencia)} km`;
+  }
+
   private obtenerFechaActual(): string {
     const fecha = new Date();
 

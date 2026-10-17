@@ -378,6 +378,7 @@ export async function retirarComponente(
         unidadId: true,
         fechaInstalacion: true,
         kilometrajeInstalacion: true,
+        vidaUtilKm: true,
         unidad: { select: { kilometrajeActual: true } },
       },
     });
@@ -402,6 +403,9 @@ export async function retirarComponente(
             fechaInicio: datos.mantenimiento.fechaInicio,
             descripcion: datos.mantenimiento.descripcion,
             costo: datos.mantenimiento.costo,
+            kilometrajeObjetivo: componente.vidaUtilKm === null
+              ? undefined
+              : componente.kilometrajeInstalacion + componente.vidaUtilKm,
           });
 
     if (
@@ -481,6 +485,7 @@ export async function reemplazarComponente(
         cantidad: true,
         fechaInstalacion: true,
         kilometrajeInstalacion: true,
+        vidaUtilKm: true,
         observaciones: true,
         unidad: {
           select: { kilometrajeActual: true },
@@ -539,6 +544,9 @@ export async function reemplazarComponente(
             fechaInicio: datos.mantenimiento.fechaInicio,
             descripcion: datos.mantenimiento.descripcion,
             costo: datos.mantenimiento.costo,
+            kilometrajeObjetivo: componente.vidaUtilKm === null
+              ? undefined
+              : componente.kilometrajeInstalacion + componente.vidaUtilKm,
           });
 
     const nuevoComponente = datos.nuevoComponente;

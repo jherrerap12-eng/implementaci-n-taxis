@@ -11,6 +11,9 @@ export interface Mantenimiento {
   fechaInicio: string;
   fechaFin: string | null;
   kilometraje: number;
+  kilometrajeObjetivo: number | null;
+  diferenciaKilometraje: number | null;
+  cumplimientoKilometraje: 'EXACTO' | 'ANTICIPADO' | 'ATRASADO' | 'SIN_OBJETIVO';
   descripcion: string;
   costo: string;
   estado: 'EN_PROCESO' | 'FINALIZADO';

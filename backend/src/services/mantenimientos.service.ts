@@ -45,9 +45,22 @@ function presentarMantenimiento<T extends { componentes: Array<{
     catalogoComponente: { nombre: string };
     posicionCatalogo: { nombre: string } | null;
   };
-}> }>(mantenimiento: T) {
+}>; kilometraje: number; kilometrajeObjetivo: number | null }>(mantenimiento: T) {
+  const diferenciaKilometraje = mantenimiento.kilometrajeObjetivo === null
+    ? null
+    : mantenimiento.kilometraje - mantenimiento.kilometrajeObjetivo;
+  const cumplimientoKilometraje = diferenciaKilometraje === null
+    ? 'SIN_OBJETIVO'
+    : diferenciaKilometraje === 0
+      ? 'EXACTO'
+      : diferenciaKilometraje < 0
+        ? 'ANTICIPADO'
+        : 'ATRASADO';
+
   return {
     ...mantenimiento,
+    diferenciaKilometraje,
+    cumplimientoKilometraje,
     componentes: mantenimiento.componentes.map((relacion) => ({
       id: relacion.id,
       accion: relacion.accion,
@@ -102,7 +115,7 @@ export async function validarMantenimientoActivo(
 
 export async function crearMantenimientoEnTransaccion(
   transaccion: Prisma.TransactionClient,
-  datos: CrearMantenimientoDatos,
+  datos: CrearMantenimientoDatos & { kilometrajeObjetivo?: number | null },
 ) {
   if (datos.fechaInicio > obtenerFechaActualGuatemala()) throw new ErrorMantenimiento('La fecha de inicio del mantenimiento no puede ser futura', 400);
   const unidadBloqueada = await transaccion.$queryRaw<Array<{ id: number }>>(
@@ -125,7 +138,17 @@ export async function crearMantenimientoEnTransaccion(
   if (mantenimientoActivo) throw new ErrorMantenimiento('La unidad ya tiene un mantenimiento en proceso', 409);
 
   const mantenimiento = await transaccion.mantenimiento.create({
-    data: { unidadId: datos.unidadId, fechaInicio: datos.fechaInicio, kilometraje: unidad.kilometrajeActual, descripcion: datos.descripcion, costo: datos.costo.toFixed(2) },
+    data: {
+      unidadId: datos.unidadId,
+      fechaInicio: datos.fechaInicio,
+      kilometraje: unidad.kilometrajeActual,
+      kilometrajeObjetivo:
+        datos.kilometrajeObjetivo === undefined
+          ? unidad.proximoMantenimientoKm
+          : datos.kilometrajeObjetivo,
+      descripcion: datos.descripcion,
+      costo: datos.costo.toFixed(2),
+    },
   });
   const unidadActualizada = await transaccion.unidad.update({ where: { id: datos.unidadId }, data: { estado: 'MANTENIMIENTO' } });
   return { ...mantenimiento, unidad: unidadActualizada, componentes: [] };
